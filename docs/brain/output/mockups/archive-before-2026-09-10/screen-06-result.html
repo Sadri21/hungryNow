@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Hero result</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 06 only.
+
+     CHROME HISTORY, because this slot has now held four things and the wording was argued
+     over each time. A centred "HungryNow" wordmark first; replaced 2026-09-07 by the
+     shared `.appbar` titled "Your pick"; retitled "Picked for you" the same day because
+     the possessive claimed the wrong owner — the user didn't pick anything, the app did;
+     and on 2026-09-08 the bar was removed from this screen altogether, its label and
+     location chip relocated into the sheet as an eyebrow row. The wording survived every
+     move: "Picked for you" says who chose and for whom, and it still does.
+
+     Consequence for shared.css: screen 06 is no longer an `.appbar` consumer, and no
+     screen currently renders `.appbar.scrolled` — it is kept for the scrolled state of
+     any future screen that needs it. */
+  /* --- `.softbg` STAYS (it was briefly removed, wrongly) ---------------------
+     For the record, because the file said the opposite for an hour: the shared blurred
+     circles were removed from this screen on 2026-09-08 and then restored the same day.
+
+     The removal was based on misreading Sadri's report. He said the sheet's background
+     should be transparent, and I read that as "the circles are causing a seam, delete
+     them". The circles were never the problem — the SHEET'S OPAQUE FILL was, because it
+     blocked the tint and made it stop dead at the sheet's edge. Deleting the circles
+     removed the seam by removing the tint, which is why the next thing he said was "but
+     the background is gone".
+
+     Kept here rather than quietly reverted because the wrong version was reasoned out at
+     length and still wrong, and the reasoning is instructive: I argued the circles "had
+     stopped earning their place" since a 228px photograph does the job of stopping the
+     screen reading as plain white. That argument is true about the PHOTO REGION and false
+     about everything below it, which is most of the scrollable content. A decorative
+     element can be redundant in one part of a screen and load-bearing in another. */
+  /* --- WHY THIS SCREEN'S CONTENT HAS NO HORIZONTAL PADDING -------------------
+     FIXED 2026-09-08 after Sadri reported the media still wasn't full-bleed.
+
+     The first attempt bled the media with `margin-left:-22px; margin-right:-22px`, the
+     same trick the app bar and the footer use. It silently did nothing, and the reason is
+     worth writing down because it will catch the SwiftUI port too:
+
+       `.result-scroll` sets `overflow-y:auto`. Per spec, `overflow-x:visible` cannot pair
+       with a scrolling `overflow-y` — it computes to `auto`. So `.result-scroll` is a
+       scroll container on BOTH axes, and negative margins on its children are clipped at
+       its padding box. A negative-margin bleed CANNOT escape a scrolling ancestor.
+
+     The app bar and the footer bleed correctly because they are siblings of
+     `.result-scroll`, not children of it — outside the scroll container, the trick works.
+     Everything inside it is trapped.
+
+     So the inset moved off the container and onto the blocks that need it: `.content` is
+     now edge-to-edge, and the app bar, the sheet, the specialty label and the specialty
+     list each carry their own 22px. The media carries none, which is what makes it
+     full-bleed — it is now the DEFAULT here, not an exception carved out of a padded
+     parent. That is also why this arrangement is more robust than the old one: adding a
+     new full-bleed element needs no rule changes, and adding a new text block that forgets
+     its padding is immediately visible rather than silently swallowed. */
+  /* --- NO APP BAR ON THIS SCREEN (2026-09-08) --------------------------------
+     Sadri's proposal, and it is better than what it replaced. The bar's two slots moved
+     INTO the sheet, directly above the name, and the media now runs to the top of the
+     screen instead of starting 44px down.
+
+     This resolves a conflict rather than compromising on it. The earlier version kept the
+     bar because a photo at y=0 would put the title and location chip over an unpredictable
+     Places photo, and legibility there needs the banned scrim. Moving the chrome onto a
+     solid surface removes the collision completely — no text sits over the photo anywhere,
+     so the no-scrim rule is honoured rather than narrowly dodged. It also frees 44px, and
+     it puts the location next to the thing it qualifies: the chip's stated job is that the
+     answer only makes sense relative to where you are, which works better 10px above the
+     name than 200px above it.
+
+     THE MEDIA RUNS TO y=0, UNDER THE STATUS BAR (revised 2026-09-08). My objection was
+     that neither status-bar style is reliably legible over an unpredictable Places photo,
+     and that the only fix was a banned scrim. Sadri's answer removes the premise: measure
+     the photo's top band at runtime and set `preferredStatusBarStyle` from it. This is what
+     Photos and Maps place cards already do, and it is strictly better than screen 02's
+     approach — 02 guarantees legibility by AUTHORING a pale top strip (0.000% ink in the
+     top 20%), which is only available for assets we control. Measuring works on photos we
+     don't.
+
+     So the constraint moved from the layout into a function, which is the right place for
+     it. `.statusBarHidden()` was never the alternative: `apple-hig.md` -> Layout permits
+     hiding the status bar only where it adds value — games and media playback — not here.
+
+     WHAT THE MEASUREMENT HAS TO GET RIGHT (notes for the Swift side, because the naive
+     version of this fails on exactly the photos that matter):
+       - SAMPLE WHERE THE GLYPHS ARE, not the whole band. The clock sits leading, the
+         indicators trailing, and the middle is the Dynamic Island with nothing drawn on
+         it. Averaging the full width lets a dark island region drag a bright strip down.
+       - USE THE WORST CASE, NOT THE MEAN. A dusk street shot can average mid-grey while
+         carrying blown-out signage directly under the clock. For dark glyphs take the
+         MAXIMUM luminance in each sampled rect; for light glyphs the MINIMUM. Pick the
+         style that wins by the larger margin.
+       - HYSTERESIS. The style is recomputed per slide, and two adjacent photos of similar
+         brightness will flip it back and forth on a slow swipe. Require a margin to change
+         rather than crossing a bare 0.5 threshold, and animate the flip
+         (`setNeedsStatusBarAppearanceUpdate()` inside an animation block) so it is never a
+         hard cut mid-gesture.
+       - CACHE PER `photoRef`. The value cannot change for a given photo, so compute once.
+       - SwiftUI gap worth knowing: `preferredStatusBarStyle` is not directly settable from
+         a SwiftUI view. It needs a `UIHostingController` subclass that overrides it, or an
+         equivalent shim. `.toolbarColorScheme` does not affect the status bar.
+
+     THE RESIDUAL RISK, NAMED RATHER THAN PAPERED OVER: some photos are genuinely ambiguous
+     — bright signage against night sky in the same 44pt band — and for those, neither style
+     clears 4.5:1 everywhere. The detector can identify that case but cannot fix it, and the
+     usual fix is a subtle scrim, which is banned. It is acceptable because the status bar is
+     small, bold, and system-drawn: the bad case is degraded, not illegible. Worth knowing it
+     exists rather than believing the function makes it disappear.
+
+     THIS IS A DELIBERATE EXCEPTION TO THE APP-BAR UNIFICATION, not drift. The rule in
+     shared.css is one bar on every in-app screen so the top never shifts between them, and
+     it still holds for 04, 05, 07, 08 and 09. Screen 06 is the destination — the peak
+     moment at the end of the flow — and dropping chrome on arrival at a detail view is the
+     platform convention, not a break from it. The cost is real and accepted: the bar
+     disappears on the 05 -> 06 transition. Recorded rather than quietly done. */
+  /* --- THE SHEET IS TRANSPARENT, AND WHY THE GROUND IS NOT --------------------
+     Two wrong readings of the same request before this landed, both mine.
+
+     Sadri asked to "make the background of information transparent" because the `.softbg`
+     tint STOPPED at the sheet — the sheet's opaque `--bg` blocked the blurred circle, so
+     the tint appeared below the sheet and not on it, and that discontinuity read as a seam
+     across the screen. He was never objecting to the circles.
+       Wrong fix 1: I removed the circles. That killed the seam and every bit of tonal
+       variation with it, so the screen went flat ("but the background is gone").
+       Wrong fix 2: I tinted the whole ground `--elevated` and kept the sheet `--bg`. That
+       is a real technique — screen 02's inversion — but it answers a different question.
+       He wanted ONE continuous ground, not two surfaces.
+
+     THE ACTUAL FIX: the sheet is transparent, so the circle tint runs through it
+     uninterrupted, and only the 36px band where it overlaps the photo stays opaque. Below
+     the photo there is nothing to hide, so there is no reason for a fill there — and the
+     fill was the entire cause of the seam.
+
+     WHY THE OVERLAP BAND CANNOT ALSO BE TRANSPARENT: the page dots sit in it. Transparent
+     there puts them straight onto an unpredictable Places photo, which needs a scrim to be
+     legible, which is banned. So the opacity is scoped to exactly the region that requires
+     it, and nowhere else.
+
+     WHY `--bg` ON THE BAND DOES NOT ITSELF CREATE A SEAM: measured, not assumed. The band
+     spans y=192-232 and `.softbg .s2` starts at y=282 (532 - 120 bottom - 130 height,
+     plus ~3px of blur). So there is no tint in that range at all — the opaque band and the
+     ground either side of it are the same flat `--bg`. If `.s2` is ever moved up, this
+     stops being true and the band's fill becomes visible. The strip is 40px rather than
+     exactly 36 so a rounding error can't leave a 1px sliver of photo showing.
+
+     The bottom hairline from the tinted-ground version is gone too: with no surface change
+     there is no boundary for it to mark, and it would have been an arbitrary line. THE
+     PICK and ALSO NEARBY are separated by the `.spec-label` micro-label, as originally. */
+  .screen-result .content{
+    position:relative; z-index:1;
+    padding-left:0; padding-right:0; padding-top:0;
+  }
+  /* Each of these owned its inset via `.content` until 2026-09-08 and now carries it. */
+  .screen-result .spec-label,
+  .screen-result .spec-list{padding-left:22px; padding-right:22px;}
+  /* The shared full-bleed rule gives the footer -22px margins to escape `.content`'s
+     padding. There is no padding left to escape, so those margins have to be cancelled or
+     the footer hangs 22px off both edges. Its own 22px padding stays. */
+  .screen-result .result-footer{margin-left:0; margin-right:0;}
+  /* --- RESTRUCTURED 2026-09-08: edge-to-edge media + an overlapping sheet -----
+     From reference 010 (hashem.advs travel app, screen 3). What Sadri wanted from it was
+     the edge-to-edge image with the title in a surface separated from the photo — and he
+     read it correctly: that reference puts the title in a card OVER the photo, never text
+     ON the photo, so it honours the no-scrim rule rather than breaking it. Edge-to-edge is
+     also the more HIG-correct arrangement: `apple-hig.md` -> Layout says extend content to
+     the screen edges, and the photo had been sitting 22px in.
+
+     WHAT THE HERO CARD BECAME. It was an inset --elevated card containing the photo. It is
+     now a full-bleed SHEET on --bg that rises over the bottom of the media. Consequences,
+     all deliberate:
+       - No fill difference against the screen ground, because the sheet IS the ground —
+         it only reads where it crosses the photo, which is the whole effect.
+       - NO DROP SHADOW, though the reference has one. Unnecessary here: a photograph
+         meeting an opaque surface is already a hard boundary, and shadows are banned.
+       - No grab-handle, though the reference draws one. A handle promises a draggable
+         sheet with detents (`apple-hig-patterns.md` -> Modality); this is a plain
+         scrolling screen, and drawing sheet furniture on one is the concept-shot trap.
+       - The 16px child inset is gone: the sheet carries real 22px padding instead, which
+         lines its text up with every other screen's content inset. It needs no negative
+         margins either — `.content` is unpadded on this screen, so the sheet is full
+         width by default and its padding is the only inset in play.
+
+     HERO vs SPECIALTY still works, and now works better. Losing the --elevated fill looks
+     like it weakens `elevation-as-selection` (adopt item 5), but the hero is now marked by
+     a 200px photograph and the fact row, against plain hairline-separated rows below. That
+     is a far stronger size-and-position distinction than a 1.13:1 surface difference was. */
+  .screen-result .hero-card{
+    padding:8px 22px 18px;
+    margin-top:-36px;              /* the overlap onto the media — 18% of its height */
+    background:transparent;
+    position:relative; z-index:1;
+  }
+  /* The opaque band, scoped to the overlap. z-index:-1 keeps it behind the sheet's own
+     text but inside the sheet's stacking context, which sits above `.hero-media` — so it
+     hides the photo without hiding the content. */
+  .screen-result .hero-card::before{
+    content:''; position:absolute; z-index:-1;
+    top:0; left:0; right:0; height:40px;
+    background:var(--bg);
+    border-radius:14px 28px 0 0;
+  }
+
+  /* --- THE HERO PHOTO — now three photos; see THE GALLERY below --------------
+     All three decisions here still hold and still constrain the gallery: no text over
+     the photo, a fixed 16:10 box with `object-fit:cover`, and the media inside the
+     card's clip rather than floating above it. Only the count changed.
+
+     Placement: full-bleed across the TOP of the hero card, text strictly below it.
+     Three decisions behind that, in order of how much they constrained it:
+
+     1. NO TEXT OVER THE PHOTO. Legible text on a real photo needs a scrim, and a
+        scrim is a gradient — visual-identity.md bans those and already carries two
+        sanctioned exceptions. A third, on a persistent surface rather than a
+        transient motion cue, is exactly the drift the rule exists to stop. Real
+        Places photos are also unpredictable: this one is a bright green facade
+        with lit yellow signage and red chairs, and no fixed overlay colour
+        survives that plus a dark interior shot plus a white-tablecloth shot.
+     2. FIXED 16:10 BOX, `object-fit:cover`. Places photos arrive at whatever
+        aspect the uploader shot, so the box is fixed and the photo is cropped to
+        it. Never the reverse, or the card height jumps per result.
+     3. THE PICK IS ONE OBJECT, NOT TWO STACKED ONES. Originally that meant the photo
+        sat inside the card's rounded clip. Since 2026-09-08 the sheet overlaps the
+        media instead, which serves the same principle by a different mechanism —
+        the overlap is what fuses photo and text into one object. A photo with a plain
+        gap beneath it would read as a banner plus a card, which is what this avoids.
+
+     Was 120px tall at 198px wide, inset in a card. Now 200px at the full 242px screen
+     width — see THE MEDIA below for the restructure and for the fold arithmetic that
+     height forces. The constraint quoted here has NOT been relaxed and is the reason
+     `.hero-lead` was cut: the name, the fact row and the reason all still have to clear
+     the fold, because the reason is what justifies the pick and an unread reason makes
+     this a generic listing app. */
+  /* --- THE GALLERY (was a single photo until 2026-09-08) ---------------------
+     Sadri's call: three photos instead of one, so someone can tell what the place
+     actually is before walking there. Right for this app — the pick is a place you have
+     to physically find, and one cropped frame doesn't tell you whether it's a shopfront,
+     a food court stall or a hotel restaurant.
+
+     HIG (`apple-hig-components.md` -> Presentation -> Scroll views): a horizontal scroll
+     view nested inside a vertical one is explicitly fine; same-orientation nesting is
+     what's forbidden. So this sits inside `.result-scroll` legitimately.
+
+     SNAP, per Sadri: "the image never stop on the middle". `scroll-snap-type: x mandatory`
+     on the track plus `scroll-snap-align: start` on each slide. Mandatory, not proximity:
+     proximity leaves a photo parked half-way if the flick was weak, which is the exact
+     defect he named. In SwiftUI this is a `TabView` with `.tabViewStyle(.page)`, which
+     snaps by default — or a `ScrollView(.horizontal)` with `.scrollTargetBehavior(.paged)`
+     on iOS 17+. Do not hand-roll a drag gesture for it.
+
+     SLIDE WIDTH = 100% of the card, so exactly one photo is ever on screen. Deliberately
+     not a peeking carousel showing a sliver of the next: at 198px a peek would steal ~20px
+     from a photo that is already the only thing telling you what the place looks like.
+     The dots carry "there are more", which is their job.
+
+     PHOTO COUNT IS NOT FIXED AT THREE. Places returns anywhere from 0 to 10 photos per
+     place. The gallery must degrade: with one photo, no dots and no scrolling (a dot row
+     under a single photo is a control that does nothing); with none, the existing
+     `.hero-photo-fallback` category icon fills the same box. Three is the design target,
+     not a guarantee — see the backend note in the callout. */
+  /* --- ASYMMETRIC CORNER: superseded the day it was added (2026-09-08) --------
+     A 28px bottom-right corner went on the media in the morning, from reference 009, and
+     came off in the afternoon when reference 010 made the media full-bleed. Full-bleed
+     media has no side corners to shape: a curve at the screen edge reads as a rendering
+     fault rather than a decision.
+
+     THE RULE SURVIVED AND GOT BETTER FOR HAVING BEEN APPLIED TWICE. First version was
+     "the constant is the corner, not the number — large radius always bottom-right, value
+     scales with the surface." The overlap sheet broke that, because a surface rising over
+     something wants its large corner at the TOP. Refined version, now used by both
+     surfaces in the app: ONE LARGE CORNER, ALWAYS ON THE RIGHT, and which vertical corner
+     depends on the edge the surface leaves free.
+       screen 02 purpose card  bleeds left            -> large bottom-right (34px)
+       screen 06 hero sheet    bleeds left/right/down -> large top-right    (28px)
+     The value still scales with the surface, and a shared radius token would still be
+     wrong — one number on two differently sized shapes is what makes an asymmetric corner
+     look arbitrary instead of drawn. */
+  /* --- THE MEDIA: full-bleed, 200px, below the app bar -----------------------
+     Full-bleed by cancelling `.content`'s 22px padding, the same mechanism the app bar
+     hairline and the footer already use on this screen. No padding restored, because
+     unlike those two there is no text inside to keep on the inset.
+
+     IT STARTS BELOW THE APP BAR, NOT AT y=0. The reference has no bar at all — just two
+     floating circular buttons on the photo, both unlabelled icon-only, which is the defect
+     8 of 10 references now ship. Screen 06 keeps the shared `.appbar` because that
+     unification exists so the top of the app never shifts between screens, and a photo
+     starting at y=0 would put status-bar text and the location chip over an unpredictable
+     Places photo. Making either legible there needs a scrim, which is banned. So the photo
+     is full-bleed horizontally and the vertical chrome stays intact.
+
+     THE 28px BOTTOM-RIGHT CORNER IS GONE, one day after being added. Full-bleed media has
+     no side corners to shape — a curve at the screen edge reads as a rendering fault, not
+     a decision — and the shape interest moved to the sheet's top corners instead. The rule
+     it came from survives, refined: LARGE CORNER ALWAYS ON THE RIGHT, and which vertical
+     corner depends on what the surface bleeds toward. Screen 02's purpose card bleeds left
+     and carries it bottom-right; this sheet bleeds left, right and down, so its only free
+     edge is the top and it carries it top-right (28px, with 14px top-left).
+
+     HEIGHT 228px — 200px of composition plus the 28px status-bar band it now runs under.
+     Sadri chose 200 for the visible proportion; growing it to 228 keeps that bottom edge
+     exactly where he approved it rather than shifting the whole sheet up.
+
+     FOLD BUDGET, remeasured 2026-09-08 after the app bar was removed, the footer went to
+     one row, and the media moved to y=0 with the status bar overlaid. The screen went from
+     1px of clearance to comfortable:
+         0  media starts (status bar is absolute, so it takes no layout height)
+       228  media ends (228px — the extra 28 over the earlier 200 is the status-bar band,
+            so the composition's bottom edge is unchanged)
+       192  sheet top after the -36px overlap
+       200  +8   sheet padding
+       222  +14 dots, +8 margin
+       258  +26 eyebrow row (label + location chip), +10 margin
+       306  +39 name (two lines) +9
+       343  +25 fact row +12
+       398  +55 reason ends (3 lines)
+       438  +22 "More", +18 photo credit
+       456  +18 sheet padding-bottom
+       458  THE FOLD (top of the 74px pinned footer)
+     Everything in the hero clears, with the specialty label starting right at the fold so
+     it peeks — which honestly signals there is more below rather than hiding it.
+
+     If it ever does get tight again, the MEDIA HEIGHT is the dial. Not the reason's line
+     count: that trades the thing which justifies the pick for the thing that decorates
+     it. 168px was the comfortable height before these two changes bought the room back. */
+  /* No negative margins: `.content` is unpadded now, so this is full width by default.
+     The earlier `-22px` version was clipped by `.result-scroll`'s scroll context and did
+     nothing at all — see the note at the top of this file. */
+  .screen-result .hero-media{width:100%;}
+
+  /* --- THE STATUS BAR SITS ON THE PHOTO NOW ----------------------------------
+     The mockup demonstrates the runtime style flip rather than picking one and hoping:
+     each slide declares `data-statusbar`, and the dot-sync script swaps this class as you
+     swipe. Slide 1 is a night shopfront with dark sky at the top, so its glyphs go light;
+     slides 2 and 3 are pale at the top and keep the dark glyphs.
+
+     This exists so the Swift implementation has something to match, and so the two hard
+     cases are visible side by side in one file instead of being described in prose. */
+  /* ABSOLUTE, so it stops consuming layout height. `.statusbar` is a flex sibling of
+     `.content` in shared.css and takes 28px out of the flow — which is correct on every
+     other screen, and wrong here the moment the photo has to reach y=0. Left in the flow
+     it pushes `.content` down 28px, so the media would start at 28 and end at 256, and the
+     28px I had just added to the media height would come straight back off the fold
+     clearance instead of going under the status bar. Overlaying it is the whole mechanism:
+     the photo occupies the top of the screen and the glyphs float on it.
+     z-index 3 puts it above `.content` (1) and the sheet (1). */
+  .screen-result .statusbar{
+    position:absolute; top:0; left:0; right:0; z-index:3;
+    color:var(--text);
+  }
+  .screen-result .statusbar.on-dark{color:var(--on-hero);}
+  .hero-gallery{position:relative;}
+  .hero-track{
+    display:flex; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .hero-track::-webkit-scrollbar{display:none;}
+  .hero-slide{flex:0 0 100%; scroll-snap-align:start; scroll-snap-stop:always;}
+  .hero-photo{
+    display:block; width:100%; height:228px; object-fit:cover;
+    background:var(--hairline);   /* holds the space while the photo loads */
+  }
+
+  /* --- PAGE DOTS -------------------------------------------------------------
+     BELOW the photo, not over it. Two reasons, and the first is already settled law in
+     this file: legible marks on a real Places photo need a scrim, a scrim is a gradient,
+     and visual-identity.md bans those outside the two sanctioned motion cues. The second
+     is that Places photos are unpredictable — a dot that reads on a dark interior shot
+     disappears on the bright green facade this very card uses.
+
+     NOT COLOURED. `apple-hig-components.md` -> Page controls is explicit: never colour
+     the dot indicators, because it breaks the system's automatic contrast handling. So
+     the active dot is --text2 and the rest are --hairline — a value difference, not a
+     pomegranate one. This is also the one place the accent reservation would have been
+     tempting and wrong: the dots aren't hero content, they're a control.
+
+     MOVED INTO THE SHEET 2026-09-08. They used to sit in a 24px strip directly under the
+     photo. The sheet now overlaps the photo's bottom 28px, so that strip would be covered
+     — and the alternatives were worse: dots ON the photo need contrast against an
+     unpredictable image, which means a scrim, which is banned. So they are the sheet's
+     first element, centred, reading as "the thing above has more". They also lost the
+     --elevated background, since the sheet is --bg and there is no longer a corner curve
+     exposing anything behind them.
+
+     The strip is 16px here rather than 24px, and the sheet's top padding is 8px, because
+     at a 200px media height every pixel above the reason matters — see the fold math on
+     the media block. Sized 5px with 5px gaps.
+
+     These are a status indicator, not the control: the swipe is. If they ever become
+     tappable they need a 28px hit area, which means padding on the hit target rather than
+     a taller visible strip. */
+  .screen-result .hero-dots{
+    display:flex; justify-content:center; align-items:center; gap:5px;
+    height:14px; margin-bottom:8px;
+  }
+
+  /* --- THE EYEBROW ROW: the app bar's two slots, relocated ---------------------
+     Same left/right arrangement the `.appbar` used — label leading, location chip
+     trailing — so the slot logic carries over instead of being reinvented in a new shape.
+     What changed is only where it sits and what voice it is in.
+
+     "Picked for you" is now an EYEBROW, not a bar title, so it is set as a micro-label
+     (uppercase, tracked, --text2) rather than at bar-title weight. That also resolves a
+     redundancy this screen has carried since 2026-09-07: the bar said "Picked for you"
+     and `.hero-lead` said "Here's the one we'd send you to." 20px below it — the same
+     sentence twice, in two voices. The lead was cut for space and this absorbs its job,
+     so the slot now holds one statement instead of two.
+
+     The location keeps `.state-chip` — a bordered pill, and correctly so: it is status
+     rather than a fact, it floats with nothing around it to anchor to, and
+     visual-identity.md's sharpened "no pill everything" rule explicitly exempts it. It is
+     the one pill left on this screen, which is what makes it read as status.
+
+     `align-items:flex-start` because the chip is taller than the label's cap height and
+     both should hang from the same top edge, not centre on each other. */
+  .hero-eyebrow{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    margin:0 0 10px;
+  }
+  .hero-eyebrow .eyebrow-label{
+    font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--text2); margin:0; padding-top:4px; white-space:nowrap;
+  }
+  .hero-dots i{
+    width:5px; height:5px; border-radius:50%; background:var(--hairline);
+    display:block; transition:background .18s ease;
+  }
+  .hero-dots i.on{background:var(--text2);}
+
+  /* Fallback for no `photoRef` or a `photo_limit_reached` 429 — the api-contract
+     says fall back to the bundled generic icon for that `foodCategory`, never a
+     broken-image state. Same 16:10 box so the layout is identical either way.
+     Swap the <img> for the commented-out block in the markup below to see it. */
+  /* Matches the media's 200px exactly — the point of the fallback is that the screen's
+     shape is identical whether a photo arrived or not. Both heights have to move together;
+     if only one changes, a quota-exhausted result becomes a visibly different layout. */
+  .hero-photo-fallback{
+    height:228px; background:var(--spec-fill); color:var(--spec-text);
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* Order inside the card: name -> meta -> reason. The meta row moved ABOVE the reason
+     because `reason` is model-generated with no length cap, so a long one pushed distance
+     and price — the two facts you decide on — off the first screen. Name dropped 17 -> 16px
+     for the same reason: real Places names are long ("Restoran Nasi Kandar Ar Rashid" is
+     typical, not a worst case) and at 17px it wrapped to three lines. */
+  /* margin-top:0, not the old 16px: the dots row now sits directly above the name and
+     carries its own 8px of separation. Leaving the 16px in place stacked the two into a
+     24px gap, which at this media height is 24px taken straight off the reason. */
+  .screen-result .hero-name{margin-top:0; font-size:16px; line-height:1.22; margin-bottom:9px;}
+  .screen-result .hero-meta{margin-bottom:12px;}
+  /* --- THE REASON CLAMP -----------------------------------------------------
+     `inline-read-more` from reference 004 — adopt item 2, and the only technique in the
+     eight references that solves a problem this vault had already written down. `reason`
+     is model-generated with no length cap, so it is the one guaranteed layout break on
+     the app's peak screen.
+
+     Clamped to 3 lines with an inline expand. Three, not two: the reason is what
+     justifies the pick, and an unread reason makes this a generic listing app — the same
+     argument that already fixed the photo at 120px rather than letting it grow.
+
+     The affordance is a text button, not a chevron or an ellipsis alone: `apple-hig.md`
+     -> Writing wants verb-led, descriptive labels and warns off "click here" style text,
+     so it reads "More" and, once expanded, "Less". A bare "…" is not a control.
+
+     In SwiftUI this is `.lineLimit(3)` with a `Button` toggling to `nil`, not a
+     truncation of the string itself — the full text must stay available to VoiceOver
+     whether the view is expanded or not. Clamping the DATA would hide it from assistive
+     tech entirely, which is the trap in doing this with a String prefix. */
+  .screen-result .hero-reason{
+    margin-bottom:0;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden;
+  }
+  .screen-result .hero-reason.open{-webkit-line-clamp:unset;}
+  .reason-more{
+    display:inline-block; margin-top:6px;
+    font-size:10.5px; font-weight:800; color:var(--hero-text);
+  }
+
+  /* --- COPY: the lead line, and its two-day life ------------------------------
+     History, because the same slot has now held three things and the next person will
+     otherwise re-litigate it. An uppercase "HERO PICK" micro-label was here first; it was
+     replaced 2026-09-07 by a sentence in the app's voice, on the grounds that the bar
+     already names the screen 20px above so the label said the same thing twice in chrome
+     voice, and that a peak moment deserves the app's own voice rather than a category tag.
+     That reasoning still stands — the slot just no longer exists.
+
+     `.hero-lead` REMOVED 2026-09-08 — "Here's the one we'd send you to."
+     MEASURED FOLD BUDGET at the chosen 200px media height, so the next person can see how
+     little slack there is rather than rediscovering it:
+       82  content starts (28 status + 10 pad + 44 bar)
+       282 media ends (200px)
+       246 sheet top after the -36px overlap
+       254 +8 sheet padding
+       268 +14 dots
+       276 +8 dots margin
+       315 +39 name (TWO lines — "Restoran Nasi Kandar Ar Rashid" wraps at 16px/198px)
+       324 +9
+       349 +25 fact row
+       361 +12
+       416 +55 reason ends (3 lines at 11.5px/1.6)
+       417 THE FOLD (top of the pinned footer)
+     One pixel. A one-line name clears by ~20px; a three-line name is cut. So this layout
+     is correct-by-arithmetic and fragile in practice — 168px was the height where it all
+     cleared comfortably, and the MEDIA HEIGHT is the dial to turn if it reads badly. Do
+     not fix it by clamping the reason to two lines; that trades the thing that justifies
+     the pick for the thing that decorates it.
+     Dropped to buy the ~32px the reason needed to clear the fold at a 200px media height.
+     It was the right thing to cut rather than shortening the reason, for two reasons:
+     the app bar already says "Picked for you" directly above it, so the lead was a second
+     layer of framing on the same idea; and the reason is the thing that justifies the
+     pick, which this file has argued twice already — an unread reason makes this a generic
+     listing app. Cutting duplicated framing to save load-bearing content is the right
+     direction of trade.
+     It also disposes of the "we'd" referent problem raised in the mockup review and parked
+     in raw/mockup-review-2026-09-07.md — not by resolving it, but by removing the sentence
+     that had it. If the lead ever comes back, that argument comes back with it. */
+
+  /* --- THE FOOTER SEPARATOR -------------------------------------------------
+     The secondary action ("Find something else" until 2026-09-08, now "Try another") is a
+     different kind of thing from everything above it:
+     the content answers the question, this discards the answer and asks again. So
+     it gets a hairline and its own band at the bottom of the screen rather than
+     sitting as one more item in the scroll.
+
+     Two details that make it read as a boundary rather than an underline:
+       - it's full-bleed (see the shared rule in shared.css), so it spans the
+         screen instead of stopping 22px short at each edge;
+       - the scroll area gets a little bottom padding, so the last chip doesn't
+         collide with the rule when the content is scrolled to the end.
+     Also `background:var(--bg)` — the footer is opaque, so content scrolling
+     underneath disappears behind it instead of showing through the gap. */
+  /* padding-top:0 overrides shared.css's 16px — the media has to MEET the app bar for
+     edge-to-edge to read as edge-to-edge. A gap there turns the photo back into a banner
+     floating under the chrome, which is what this restructure was undoing. */
+  .screen-result .result-scroll{padding-top:0; padding-bottom:14px;}
+  /* --- ONE ROW, NOT TWO (2026-09-08) -----------------------------------------
+     Sadri: the pinned footer was taking too much of the screen. It was 115px — a 46px
+     filled button, a 33px ghost stacked under it, and 34px of padding — on a 532px screen
+     whose most important content was already fighting for room. Now 74px: both actions on
+     one row, primary flexing to fill and the secondary sized to its label.
+
+     THE 41px SAVED GOES SOMEWHERE THAT MATTERS. It moves the fold from 417 to 458, which
+     turns the reason's clearance from 1px into 42px and brings "More" and the photo credit
+     above the fold as well. So this was not only a proportion fix — it retired the
+     fragility flagged when the media went to 200px. Between shrinking the footer and
+     shrinking the photo, the footer was always the right thing to cut: it is chrome, and
+     the photo and the reason are the content.
+
+     STILL PINNED, NOT IN THE SCROLL. Sadri's other suggestion was to drop it into the flow
+     below the content. Rejected for the reason already recorded on this screen: the card
+     scrolls, and a primary action that can scroll out of reach isn't one. `apple-hig.md`
+     -> Designing for iOS also puts reachable controls in the thumb zone. Making it smaller
+     was the right half of that idea; unpinning it was not.
+
+     The hairline and the opaque `--bg` stay, and still do the same two jobs: mark this as
+     a different kind of thing from the content above, and hide content scrolling under it
+     rather than letting it show through. */
+  .screen-result .result-footer{
+    flex:0 0 auto; background:var(--bg);
+    border-top:1px solid var(--hairline);
+    padding-top:10px; padding-bottom:20px;
+    display:flex; flex-direction:row; align-items:center; gap:10px;
+  }
+
+  /* --- DIRECTIONS: the screen's primary action -------------------------------
+     "Take me there" is what someone actually wants after reading the pick, so it
+     is the filled pomegranate button and the secondary drops to a ghost — beside it
+     since 2026-09-08, stacked beneath it before that. Both live in the pinned footer
+     rather than inside the card: the card scrolls, and a primary action that can scroll
+     out of reach isn't one.
+
+     WHICH APP: no chooser by default. iOS has no "default maps app" API, so the
+     plan is — check `canOpenURL` for the nav apps that are actually installed
+     (`comgooglemaps://`, `waze://`), and if more than one is available show a
+     short action sheet; if only one, open it straight away. A chooser every single
+     time is friction on the app's one repeated action, and remembering a choice
+     would mean a settings screen this product deliberately doesn't have.
+     Gotcha for the Swift work: `canOpenURL` returns false unless those schemes
+     are declared in `LSApplicationQueriesSchemes` in Info.plist — it fails
+     silently, so it looks like "no nav apps installed" on a device that has both.
+
+     BLOCKED ON THE BACKEND — see app-mockups.md. The response carries `name` and
+     `address` only, no coordinates and no `placeId`, so the deep link would have
+     to pass a text query and let the nav app re-geocode it. For a chain like this
+     one that lands people at the wrong branch, which is worse than no button.
+
+     SIDE BY SIDE SINCE 2026-09-08, and the hierarchy survives it. Primary flexes to fill
+     whatever the secondary doesn't need, so Directions stays the wide filled pomegranate
+     pill and the secondary reads as a text button beside it — filled-versus-ghost is
+     carrying the hierarchy, which is what it was already doing vertically.
+
+     "Find something else" became "Try another": the old label needs ~104px and there are
+     only ~78px beside the primary. Shortened rather than turned into a reload GLYPH, which
+     was Sadri's other idea — an unlabelled icon-only control is the defect 8 of 10
+     references in this project ship, and the pre-ship checklist has a line item against
+     exactly that. `apple-hig.md` -> Writing also wants verb-led labels, which is why it is
+     "Try another" and not the tidier-looking "Another". */
+  .screen-result .result-footer .btn-primary{
+    width:auto; flex:1 1 auto; margin-bottom:0; padding:14px 16px;
+  }
+  /* --- THE SECONDARY, NOW ICON-ONLY (2026-09-08) ------------------------------
+     Sadri asked for this twice and I pushed back too hard the first time, on the wrong
+     grounds. The pre-ship checklist in reference-adoption.md says every glyph carries
+     "a visible label OR a VoiceOver accessibility label" — the defect the references ship
+     is UNLABELLED icon-only, not icon-only as such. With an accessibility label this is
+     compliant, and my blanket objection was an overstatement.
+
+     THE REAL OBJECTION WAS THE GLYPH, NOT THE FORM, and it stands: screens 08 and 09 use a
+     single circular arrow for "Try again", where reload is genuinely the meaning — retry
+     the request that just failed. Screen 06's action is not a retry; it discards a
+     perfectly good answer and asks for a different one. Reusing the refresh arrow would
+     give one symbol two meanings three screens apart, and `apple-hig.md` -> Icons wants
+     consistent meaning as much as consistent weight. Hence the TWO-arrow circlepath here
+     (`arrow.triangle.2.circlepath` in SF Symbols) against 08/09's single arrow
+     (`arrow.clockwise`). Two arrows read as "swap for another", one reads as "again".
+
+     NOT A HAIRLINE RING. A bare glyph beside a filled pill is weak as an affordance, so it
+     needs a surface — but a bordered circle next to the primary would be a second drawn
+     container in a 198px row. A flat --hero-fill tint gives it presence with nothing drawn,
+     and it matches `.mark` and `.state-icon`, which already use exactly that treatment.
+     This is a button, so the "no pill everything" rule in visual-identity.md doesn't bite:
+     that rule exempts buttons and targets facts dressed as objects.
+
+     34px square ≈ 55pt at this mockup's scale, comfortably past the HIG's 44pt target —
+     which matters more here than anywhere else on the screen, because an icon-only control
+     gives no text to aim at.
+
+     SWIFTUI: `.accessibilityLabel("Try another")` is NOT optional on this button. It is the
+     only thing standing between this and the defect 8 of 10 references ship. */
+  .screen-result .result-footer .btn-ghost{
+    width:34px; height:34px; flex:0 0 auto; padding:0;
+    border-radius:50%;
+    background:var(--hero-fill); color:var(--hero-text);
+  }
+
+  /* Google requires photo attributions to be displayed. `get_photo` doesn't return
+     them yet — see the open item in app-mockups.md. Styled and placed now so the
+     layout already accounts for it rather than having to be reopened later. */
+  .photo-credit{
+    font-size:9px; color:var(--text2); opacity:.75; margin:6px 0 0;
+  }
+</style>
+</head>
+<body>
+  <p class="screen-title">06 · Hero result<span>The peak moment (Peak-End Rule) — pomegranate marks the one hero pick, pistachio marks the specialty row. Photo sits full-bleed at the top of the card with no text over it; the reason below is what justifies the pick.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-result">
+      <div class="softbg"><span class="s1"></span><span class="s2"></span></div>
+      <div class="statusbar" id="statusBar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+
+        <div class="result-scroll">
+
+          <!-- Media first, full-bleed, meeting the app bar. The sheet below pulls up over
+               its bottom 28px. `.hero-lead` used to sit above here and was cut — see the CSS. -->
+          <div class="hero-media">
+
+            <!-- ORDER IS NOT THE ORDER PLACES RETURNS. Slides alternate kind on purpose:
+                 close exterior, then the food, then the wide street view. Both exteriors
+                 next to each other read as a duplicate-image bug rather than as two views,
+                 which is a real risk since Places often returns several frames of the same
+                 facade. Rule for the backend sort: never place two photos of the same kind
+                 adjacent if a different kind is available. -->
+            <div class="hero-gallery">
+              <div class="hero-track" id="heroTrack">
+                <div class="hero-slide" data-credit="Photo: Google user" data-statusbar="light">
+                  <img class="hero-photo" src="hero-photo-example.jpg" alt="Night-time photo of Restoran Nasi Kandar Ar Rashid — a green corner shopfront with lit signage and red plastic chairs on the forecourt">
+                </div>
+                <div class="hero-slide" data-credit="Image: foodpanda — placeholder, not a Places photo" data-statusbar="dark">
+                  <img class="hero-photo" src="hero-photo-dish.jpg" alt="A plate of fried noodles topped with sliced fried chicken, red chillies and cucumber">
+                </div>
+                <div class="hero-slide" data-credit="Photo: Google user" data-statusbar="dark">
+                  <img class="hero-photo" src="hero-photo-street.jpg" alt="Street view of the restaurant from across the road — a large green building with the Nasi Kandar Al Rashid sign lit above the entrance, market stalls in the foreground">
+                </div>
+              </div>
+            </div>
+
+            <!-- Fallback variant — no photoRef at all, or photo quota exhausted. Replaces
+                 the whole gallery, not one slide: with zero photos there is nothing to page
+                 through, so the dots (down in the sheet) hide themselves too.
+            <div class="hero-photo-fallback">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+                <path d="M4 11h16"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M3 20h18"/>
+              </svg>
+            </div>
+            -->
+          </div><!-- /.hero-media -->
+
+          <!-- The sheet. Rises 28px over the media; large corner top-right. Dots live here
+               now rather than under the photo, because the overlap would cover them. -->
+          <div class="hero-card">
+            <div class="hero-dots" id="heroDots" aria-hidden="true">
+              <i class="on"></i><i></i><i></i>
+            </div>
+
+            <!-- The app bar's two slots, relocated into the sheet: label leading, location
+                 chip trailing. "Picked for you" is an eyebrow here, not a bar title, and it
+                 absorbs the job the deleted `.hero-lead` used to do. -->
+            <div class="hero-eyebrow">
+              <p class="eyebrow-label">Picked for you</p>
+              <span class="state-chip">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+                  <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>
+                </svg>
+                Seminyak, Bali
+              </span>
+            </div>
+
+            <p class="hero-name">Restoran Nasi Kandar Ar Rashid</p>
+
+            <!-- The shared `.fact-row`, fixed order: distance, price, rating. Metric, because
+                 the user is a tourist in Indonesia — "0.4 mi" was here until 2026-09-08 while
+                 screen 08 said "1.5 km" two screens away.
+
+                 Price is "Rp Rp", not "$$" and not the word "Mid-range". Two changes here:
+                 the dollar glyph reads as USD while Google's `price_level` is currency-
+                 neutral, and the word doesn't fit a value-over-label column (the value has
+                 to be terse or the three columns stop scanning as a row). "Rp Rp" is what
+                 Google Maps itself shows in Indonesia, so it's the local convention rather
+                 than an invention — and the label underneath says what it is.
+
+                 The star is gone from the rating: the label already says RATING, so a glyph
+                 plus a caption was the same word twice. -->
+            <div class="hero-meta fact-row">
+              <div class="fact"><p class="fact-value">400 m</p><p class="fact-label">away</p></div>
+              <div class="fact"><p class="fact-value">Rp Rp</p><p class="fact-label">price</p></div>
+              <div class="fact"><p class="fact-value">4.7</p><p class="fact-label">rating</p></div>
+            </div>
+
+            <p class="hero-reason">Locals queue here past midnight for the beef rendang — half the price of the tourist-strip spots, and it never closes. The rendang sells out most nights before 1am, so the queue moves fast and the kitchen keeps cooking until it does.</p>
+            <span class="reason-more">More</span>
+            <!-- Attribution now has to FOLLOW THE ACTIVE SLIDE. Google requires each photo's
+                 attributions be displayed, and three photos means three different credits —
+                 a single static line was defensible with one photo and is wrong with three.
+                 Per-slide strings live on the slides as `data-credit` and this updates as
+                 you swipe. Open question for the backend: `get_photo` returns no attribution
+                 data at all yet, so all three of these are placeholders. -->
+            <p class="photo-credit" id="photoCredit">Photo: Google user</p>
+          </div>
+
+          <!-- SPECIALTIES: a list, not a chip row. These used to be three bare cuisine
+               names (`foodCategory` only) while the API was already returning name,
+               address, reason and description for each. `origin-tag` applied: the place
+               is primary, the category is the tag. See the shared.css block for why this
+               is a list rather than the clipped horizontal row on the adopt list. -->
+          <p class="spec-label">Also nearby</p>
+          <ul class="spec-list">
+            <li class="spec-item">
+              <p class="spec-name">Warung Nasi Ibu Oka</p>
+              <p class="spec-cat">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+                  <path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8.5 9.5c.8-1.2 2-1.8 3.5-1.8s2.7.6 3.5 1.8"/>
+                </svg>
+                Babi Guling
+              </p>
+            </li>
+            <li class="spec-item">
+              <p class="spec-name">Sate Babi Bawah Pohon</p>
+              <p class="spec-cat">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+                  <path d="M6 18L18 6"/><circle cx="10.5" cy="13.5" r="2.1"/><circle cx="14.5" cy="9.5" r="2.1"/>
+                </svg>
+                Satay
+              </p>
+            </li>
+            <li class="spec-item">
+              <p class="spec-name">Kedai Kopi Bhineka Djaja</p>
+              <p class="spec-cat">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+                  <path d="M6 7h11v6a5.5 5.5 0 0 1-11 0z"/><path d="M17 8h2.5a2 2 0 0 1 0 4H17"/>
+                </svg>
+                Coffee
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="result-footer">
+          <div class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2.5L14 21.5l-2.5-7-7-2.5z"/>
+            </svg>
+            Directions
+          </div>
+          <!-- Icon-only. The `aria-label` here is the mockup's stand-in for SwiftUI's
+               `.accessibilityLabel("Try another")`, which is mandatory on this control —
+               see the CSS. Two-arrow circlepath, deliberately NOT screens 08/09's
+               single-arrow refresh: this swaps the answer, it doesn't retry a request. -->
+          <div class="btn-ghost" role="button" aria-label="Try another">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 8.5a8 8 0 0 1 13.3-2.6L20 8.5"/><path d="M20 3.5v5h-5"/>
+              <path d="M20 15.5a8 8 0 0 1-13.3 2.6L4 15.5"/><path d="M4 20.5v-5h5"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+  <p class="callout"><b style="color:#F5EFE4">Restructured 2026-09-08 (reference 010).</b> Media is full-bleed and 200px tall, running to the very top of the screen, under the status bar, with the content sheet rising 36px over it — large corner top-right. <b style="color:#F5EFE4">No app bar on this screen:</b> “Picked for you” and the location chip moved into the sheet as an eyebrow row, which is what lets the photo reach the top without putting app text over it. Swipe and watch the status-bar glyphs flip light/dark with the slide — declared per slide here, measured from the photo at runtime in the app.</p>
+  <p class="callout"><b style="color:#F5EFE4">Footer is one row now, 74px instead of 115px.</b> Directions flexes to fill, and the secondary is a 34px icon-only button beside it — a two-arrow circlepath, deliberately not screens 08/09’s single-arrow refresh, because this swaps the answer rather than retrying a request. Its accessibility label is mandatory, not optional. The 41px saved moved the fold from 417 to 458 — so the reason now clears by ~42px instead of ~1px, and “More” and the photo credit clear it too. Shrinking chrome rather than the photo was the right side of that trade.</p>
+  <p class="callout" style="color:#8C8175">Superseded twice over — removing the app bar and shrinking the footer bought back 85px between them. For the record: at 200px the reason once cleared the fold by about <b style="color:#F5EFE4">one pixel</b>, assuming the name wraps to two lines. A one-line name clears by ~20px; a three-line name gets cut. The fold arithmetic is written out in the CSS — if it reads badly, turn the <b style="color:#F5EFE4">media height</b> down toward 168px. Never fix it by clamping the reason to two lines.</p>
+  <p class="callout">Swipe the photo to see the snap — <code>scroll-snap-type: x mandatory</code>, so it can never rest between two images. The dots and the credit line follow the active slide.</p>
+  <p class="callout"><b style="color:#F5EFE4">The gallery is ahead of the backend in two ways, and one of them costs money.</b> The response carries a single <code>photoRef</code>, so three photos needs a <code>photoRefs</code> array — and <code>get_photo</code> is metered against <code>DAILY_PHOTO_LIMIT</code> (currently 33). Fetching three per result cuts the day from 33 results to 11. Fix is to fetch slide 1 with the result and slides 2–3 only when someone actually swipes: most people never will, so the common case stays at one photo.</p>
+  <p class="callout">Also ahead of the API, all open in <code>app-mockups.md</code>: Directions needs <code>latitude</code>/<code>longitude</code>/<code>placeId</code>; the <code>400 m</code> and <code>4.7</code> in the fact row aren't in the contract; and <code>get_photo</code> returns no attribution data even though Google requires it be displayed — now three times over. The specialty list, by contrast, needs <em>nothing new</em>.</p>
+  <p class="callout" style="color:#F0A050"><b style="color:#F5EFE4">Slide 2 is a placeholder that cannot ship.</b> It carries a visible “Image by foodpanda / For reference only” watermark — it is foodpanda's asset, not a Places photo, and screen 06 leads the portfolio set. Replace it with a real Places photo of a dish before any screenshot or demo recording. Not cropped out on purpose: removing someone's attribution watermark is worse than showing it.</p>
+
+<script>
+/* Dots + attribution follow the active slide. Mockup only — in SwiftUI a TabView with
+   `.tabViewStyle(.page)` gives you the selection binding and the dots for free, and the
+   credit is just a view driven off that binding.
+
+   `round(scrollLeft / clientWidth)` rather than tracking the drag: with
+   `scroll-snap-type: x mandatory` the browser guarantees the track settles on a slide
+   boundary, so reading the settled position is both simpler and exactly right. Tracking
+   the gesture would re-implement what snap already does.
+
+   No scroll-end event is needed either — the handler is cheap and idempotent, so firing
+   it during the glide just moves the dot as the photo moves, which is what you want. */
+(function () {
+  var track = document.getElementById('heroTrack');
+  var dots  = document.getElementById('heroDots');
+  var credit = document.getElementById('photoCredit');
+  var statusBar = document.getElementById('statusBar');
+  if (!track || !dots) return;
+
+  var slides = track.querySelectorAll('.hero-slide');
+  var marks  = dots.querySelectorAll('i');
+
+  /* One photo: the dot row is a control that does nothing, so it isn't drawn at all.
+     Same reasoning as the zero-photo case falling back to the category icon. */
+  if (slides.length < 2) { dots.hidden = true; return; }
+
+  function sync() {
+    var i = Math.round(track.scrollLeft / track.clientWidth);
+    if (i < 0) i = 0;
+    if (i > slides.length - 1) i = slides.length - 1;
+    for (var m = 0; m < marks.length; m++) marks[m].classList.toggle('on', m === i);
+    var c = slides[i].getAttribute('data-credit');
+    if (credit && c) credit.textContent = c;
+    /* The status-bar style follows the visible photo. Here it is declared per slide; in
+       the app it is measured from the photo's top band — see the CSS note on THE MEDIA
+       for what that measurement has to get right. */
+    if (statusBar) {
+      statusBar.classList.toggle('on-dark', slides[i].getAttribute('data-statusbar') === 'light');
+    }
+  }
+  track.addEventListener('scroll', sync, { passive: true });
+  sync();
+})();
+</script>
+
+<script>
+/* The reason clamp's expand. Mockup only; in SwiftUI this is `.lineLimit(open ? nil : 3)`
+   on the Text, with the full string always present so VoiceOver reads all of it either
+   way — clamping the DATA is the trap this is standing in for. */
+(function () {
+  var btn = document.querySelector('.reason-more');
+  var body = document.querySelector('.hero-reason');
+  if (!btn || !body) return;
+  btn.addEventListener('click', function () {
+    var open = body.classList.toggle('open');
+    btn.textContent = open ? 'Less' : 'More';
+  });
+  btn.style.cursor = 'pointer';
+})();
+</script>
+</body>
+</html>

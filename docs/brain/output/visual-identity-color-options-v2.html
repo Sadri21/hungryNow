@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — color directions, round 2</title>
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#0B0C0E; padding:52px 24px 100px;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .wrap{max-width:1280px;margin:0 auto;}
+  .intro{color:#A9ACB3; max-width:760px; margin:0 0 40px;}
+  .intro .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#6E7177; margin:0 0 10px;}
+  .intro h1{color:#F4F5F7; font-size:26px; font-weight:800; margin:0 0 12px; letter-spacing:-.01em;}
+  .intro p{font-size:14px; line-height:1.65; margin:0 0 10px;}
+  .intro .note{font-size:12.5px; color:#F0A050; background:rgba(240,160,80,.08); border-left:2px solid #F0A050; padding:12px 14px; border-radius:4px; margin-top:16px;}
+  .keep-tag{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:4px 9px; border-radius:100px; background:rgba(143,209,79,.15); color:#8FD14F; margin-bottom:10px;}
+  .new-tag{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:4px 9px; border-radius:100px; background:rgba(240,160,80,.15); color:#F0A050; margin-bottom:10px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:24px;}
+  .card{border-radius:16px; padding:28px 26px 30px; position:relative; overflow:hidden;}
+  .num{position:absolute; top:22px; right:24px; font-size:11px; font-weight:800; letter-spacing:.08em; opacity:.55;}
+  .name{font-size:19px; font-weight:800; margin:0 0 4px;}
+  .tagline{font-size:12.5px; opacity:.75; margin:0 0 20px; line-height:1.5;}
+
+  .swatches{display:flex; gap:6px; margin-bottom:20px;}
+  .chip{flex:1; height:44px; border-radius:8px; display:flex; align-items:flex-end; padding:6px 8px;}
+  .chip span{font-size:8.5px; font-weight:700; font-family:ui-monospace,"SF Mono",Menlo,monospace;}
+
+  .mini-phone{border-radius:14px; padding:16px 16px 18px; border:1px solid var(--rule);}
+  .mini-btn{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:8px 14px; border-radius:100px; margin-bottom:14px;}
+  .mini-btn .dot{width:6px;height:6px;border-radius:50%;}
+  .mini-hero{border-radius:10px; padding:13px 14px 14px; margin-bottom:14px;}
+  .mini-hero .r-name{font-weight:800; font-size:14px; margin:0 0 4px;}
+  .mini-hero .r-reason{font-size:10.5px; line-height:1.5; margin:0 0 9px; opacity:.85;}
+  .mini-hero .r-meta{font-size:9.5px; font-weight:700; opacity:.85; font-family:ui-monospace,"SF Mono",Menlo,monospace;}
+  .mini-spec-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .mini-chip{font-size:10px; font-weight:700; padding:5px 10px; border-radius:100px; border:1.3px solid;}
+
+  .why{font-size:11.5px; line-height:1.6; margin-top:16px; opacity:.8;}
+  .why b{opacity:1;}
+
+  /* KEPT — Passport Teal */
+  .c2{background:#F5F7F7; color:#0F2A2E; --rule:#DCE6E6;}
+  .c2 .tagline,.c2 .why{color:#4C6265;}
+  .c2 .swatches .chip:nth-child(1){background:#0F2A2E; color:#F5F7F7;}
+  .c2 .swatches .chip:nth-child(2){background:#F5F7F7; color:#0F2A2E; border:1px solid #DCE6E6;}
+  .c2 .swatches .chip:nth-child(3){background:#F2A93C; color:#3A2400;}
+  .c2 .swatches .chip:nth-child(4){background:#1C7C8C; color:#fff;}
+  .c2 .mini-phone{background:#F5F7F7;}
+  .c2 .mini-btn{background:rgba(242,169,60,.14); color:#8A5A0E; border:1.3px solid #8A5A0E;}
+  .c2 .mini-btn .dot{background:#8A5A0E;}
+  .c2 .mini-hero{background:#EAF0F0;}
+  .c2 .mini-chip{color:#136170; border-color:#136170; background:rgba(28,124,140,.1);}
+
+  /* KEPT — Tropical Sunset */
+  .c4{background:#FFF8F3; color:#2B1720; --rule:#F2DFD2;}
+  .c4 .tagline,.c4 .why{color:#6B4E58;}
+  .c4 .swatches .chip:nth-child(1){background:#2B1720; color:#FFF8F3;}
+  .c4 .swatches .chip:nth-child(2){background:#FFF8F3; color:#2B1720; border:1px solid #F2DFD2;}
+  .c4 .swatches .chip:nth-child(3){background:#FF6B35; color:#fff;}
+  .c4 .swatches .chip:nth-child(4){background:#00B8A9; color:#fff;}
+  .c4 .mini-phone{background:#FFF8F3;}
+  .c4 .mini-btn{background:rgba(255,107,53,.12); color:#D14E1A; border:1.3px solid #D14E1A;}
+  .c4 .mini-btn .dot{background:#D14E1A;}
+  .c4 .mini-hero{background:#FBEEE5;}
+  .c4 .mini-chip{color:#00897D; border-color:#00897D; background:rgba(0,184,169,.1);}
+
+  /* NEW 6 — Golden Compass */
+  .c6{background:#101C33; color:#F4EFE3; --rule:#28385A;}
+  .c6 .tagline,.c6 .why{color:#A9B4C9;}
+  .c6 .swatches .chip:nth-child(1){background:#F4EFE3; color:#101C33;}
+  .c6 .swatches .chip:nth-child(2){background:#182A4A; color:#F4EFE3; border:1px solid #28385A;}
+  .c6 .swatches .chip:nth-child(3){background:#FFB020; color:#3A2400;}
+  .c6 .swatches .chip:nth-child(4){background:#FF5A5F; color:#fff;}
+  .c6 .mini-phone{background:#101C33;}
+  .c6 .mini-btn{background:rgba(255,176,32,.16); color:#FFB020; border:1.3px solid #FFB020;}
+  .c6 .mini-btn .dot{background:#FFB020;}
+  .c6 .mini-hero{background:#182A4A;}
+  .c6 .mini-chip{color:#FF8489; border-color:#FF8489; background:rgba(255,90,95,.12);}
+
+  /* NEW 7 — Emerald Feast */
+  .c7{background:#F5FBF8; color:#122019; --rule:#D9EBE2;}
+  .c7 .tagline,.c7 .why{color:#4C6559;}
+  .c7 .swatches .chip:nth-child(1){background:#122019; color:#F5FBF8;}
+  .c7 .swatches .chip:nth-child(2){background:#F5FBF8; color:#122019; border:1px solid #D9EBE2;}
+  .c7 .swatches .chip:nth-child(3){background:#0FA968; color:#fff;}
+  .c7 .swatches .chip:nth-child(4){background:#FF6F59; color:#fff;}
+  .c7 .mini-phone{background:#F5FBF8;}
+  .c7 .mini-btn{background:rgba(15,169,104,.12); color:#0B7C4C; border:1.3px solid #0B7C4C;}
+  .c7 .mini-btn .dot{background:#0B7C4C;}
+  .c7 .mini-hero{background:#E9F5EF;}
+  .c7 .mini-chip{color:#D14A34; border-color:#D14A34; background:rgba(255,111,89,.1);}
+
+  /* NEW 8 — Berry Market */
+  .c8{background:#FBF7F5; color:#2A1230; --rule:#EBDDE6;}
+  .c8 .tagline,.c8 .why{color:#6B5670;}
+  .c8 .swatches .chip:nth-child(1){background:#2A1230; color:#FBF7F5;}
+  .c8 .swatches .chip:nth-child(2){background:#FBF7F5; color:#2A1230; border:1px solid #EBDDE6;}
+  .c8 .swatches .chip:nth-child(3){background:#E63262; color:#fff;}
+  .c8 .swatches .chip:nth-child(4){background:#FFC145; color:#3A2400;}
+  .c8 .mini-phone{background:#FBF7F5;}
+  .c8 .mini-btn{background:rgba(230,50,98,.1); color:#C41E4E; border:1.3px solid #C41E4E;}
+  .c8 .mini-btn .dot{background:#C41E4E;}
+  .c8 .mini-hero{background:#F3E7EE;}
+  .c8 .mini-chip{color:#A9760A; border-color:#A9760A; background:rgba(255,193,69,.14);}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <p class="eyebrow">HungryNow — Color Direction Options, Round 2</p>
+    <h1>Chili Pop, Citrus Blue, Neon Night Market eliminated</h1>
+    <p>Keeping Passport Teal and Tropical Sunset from round 1, replacing the other three with fresh directions — different hue families than anything shown before (no more red/lime, magenta/mint-on-black, or mango/cobalt), still travel + food + hungry, still eye-catching but able to read professional.</p>
+    <p class="note">Same as last round: direction only, not contrast-checked yet. Pick one and I'll do the full pass — WCAG-checked dark mode, typography, motion — and update <code>visual-identity.md</code>.</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="card c2">
+      <p class="num">02</p>
+      <span class="keep-tag">Kept from round 1</span>
+      <p class="name">Passport Teal</p>
+      <p class="tagline">Deep teal text on cool white, saffron gold + petrol blue — travel-premium, like a boutique airline app.</p>
+      <div class="swatches">
+        <div class="chip"><span>#0F2A2E</span></div>
+        <div class="chip"><span>#F5F7F7</span></div>
+        <div class="chip"><span>#F2A93C</span></div>
+        <div class="chip"><span>#1C7C8C</span></div>
+      </div>
+      <div class="mini-phone">
+        <div class="mini-btn"><span class="dot"></span>Find me something good</div>
+        <div class="mini-hero">
+          <p class="r-name">Kedai Nasi Kandar Rashid</p>
+          <p class="r-reason">Locals queue here at lunch for the beef rendang — half the price of the tourist strip.</p>
+          <p class="r-meta">📍 0.4 mi · $$ · ★ 4.7</p>
+        </div>
+        <div class="mini-spec-row">
+          <span class="mini-chip">🍜 Ramen</span><span class="mini-chip">🍣 Sushi</span><span class="mini-chip">🍢 Satay</span>
+        </div>
+      </div>
+      <p class="why"><b>Feels like:</b> the most "trustworthy" option on the board — reads travel-companion first, food second.</p>
+    </div>
+
+    <div class="card c4">
+      <p class="num">04</p>
+      <span class="keep-tag">Kept from round 1</span>
+      <p class="name">Tropical Sunset</p>
+      <p class="tagline">Warm blush-white, plum text, sunset orange + ocean turquoise — vacation mood, unmistakably travel+food.</p>
+      <div class="swatches">
+        <div class="chip"><span>#2B1720</span></div>
+        <div class="chip"><span>#FFF8F3</span></div>
+        <div class="chip"><span>#FF6B35</span></div>
+        <div class="chip"><span>#00B8A9</span></div>
+      </div>
+      <div class="mini-phone">
+        <div class="mini-btn"><span class="dot"></span>Find me something good</div>
+        <div class="mini-hero">
+          <p class="r-name">Kedai Nasi Kandar Rashid</p>
+          <p class="r-reason">Locals queue here at lunch for the beef rendang — half the price of the tourist strip.</p>
+          <p class="r-meta">📍 0.4 mi · $$ · ★ 4.7</p>
+        </div>
+        <div class="mini-spec-row">
+          <span class="mini-chip">🍜 Ramen</span><span class="mini-chip">🍣 Sushi</span><span class="mini-chip">🍢 Satay</span>
+        </div>
+      </div>
+      <p class="why"><b>Feels like:</b> the warmest, friendliest option — orange+turquoise reads sunset-over-ocean immediately.</p>
+    </div>
+
+    <div class="card c6">
+      <p class="num">06</p>
+      <span class="new-tag">New</span>
+      <p class="name">Golden Compass</p>
+      <p class="tagline">Dark navy base, warm cream text, amber gold + coral — adventure/exploration mood, premium dark mode as the primary appearance.</p>
+      <div class="swatches">
+        <div class="chip"><span>#F4EFE3</span></div>
+        <div class="chip"><span>#101C33</span></div>
+        <div class="chip"><span>#FFB020</span></div>
+        <div class="chip"><span>#FF5A5F</span></div>
+      </div>
+      <div class="mini-phone">
+        <div class="mini-btn"><span class="dot"></span>Find me something good</div>
+        <div class="mini-hero">
+          <p class="r-name">Kedai Nasi Kandar Rashid</p>
+          <p class="r-reason">Locals queue here at lunch for the beef rendang — half the price of the tourist strip.</p>
+          <p class="r-meta">📍 0.4 mi · $$ · ★ 4.7</p>
+        </div>
+        <div class="mini-spec-row">
+          <span class="mini-chip">🍜 Ramen</span><span class="mini-chip">🍣 Sushi</span><span class="mini-chip">🍢 Satay</span>
+        </div>
+      </div>
+      <p class="why"><b>Feels like:</b> a premium adventure-travel app (map/compass/gold-coin energy) — the only dark-first option left standing, more restrained than Neon Night Market was.</p>
+    </div>
+
+    <div class="card c7">
+      <p class="num">07</p>
+      <span class="new-tag">New</span>
+      <p class="name">Emerald Feast</p>
+      <p class="tagline">Mint-white base, deep forest text, jewel-tone emerald + burnt coral — fresh, upscale-casual dining feel.</p>
+      <div class="swatches">
+        <div class="chip"><span>#122019</span></div>
+        <div class="chip"><span>#F5FBF8</span></div>
+        <div class="chip"><span>#0FA968</span></div>
+        <div class="chip"><span>#FF6F59</span></div>
+      </div>
+      <div class="mini-phone">
+        <div class="mini-btn"><span class="dot"></span>Find me something good</div>
+        <div class="mini-hero">
+          <p class="r-name">Kedai Nasi Kandar Rashid</p>
+          <p class="r-reason">Locals queue here at lunch for the beef rendang — half the price of the tourist strip.</p>
+          <p class="r-meta">📍 0.4 mi · $$ · ★ 4.7</p>
+        </div>
+        <div class="mini-spec-row">
+          <span class="mini-chip">🍜 Ramen</span><span class="mini-chip">🍣 Sushi</span><span class="mini-chip">🍢 Satay</span>
+        </div>
+      </div>
+      <p class="why"><b>Feels like:</b> jewel-toned emerald instead of leafy green avoids the "healthy salad app" cliché — coral keeps it appetizing rather than clinical.</p>
+    </div>
+
+    <div class="card c8">
+      <p class="num">08</p>
+      <span class="new-tag">New</span>
+      <p class="name">Berry Market</p>
+      <p class="tagline">Warm white, deep plum text, raspberry + marigold — jewel-toned, playful, spice-market energy.</p>
+      <div class="swatches">
+        <div class="chip"><span>#2A1230</span></div>
+        <div class="chip"><span>#FBF7F5</span></div>
+        <div class="chip"><span>#E63262</span></div>
+        <div class="chip"><span>#FFC145</span></div>
+      </div>
+      <div class="mini-phone">
+        <div class="mini-btn"><span class="dot"></span>Find me something good</div>
+        <div class="mini-hero">
+          <p class="r-name">Kedai Nasi Kandar Rashid</p>
+          <p class="r-reason">Locals queue here at lunch for the beef rendang — half the price of the tourist strip.</p>
+          <p class="r-meta">📍 0.4 mi · $$ · ★ 4.7</p>
+        </div>
+        <div class="mini-spec-row">
+          <span class="mini-chip">🍜 Ramen</span><span class="mini-chip">🍣 Sushi</span><span class="mini-chip">🍢 Satay</span>
+        </div>
+      </div>
+      <p class="why"><b>Feels like:</b> the most playful of round 2 — raspberry+marigold reads market-stall/spice-bazaar, still keeps enough plum/white restraint to not tip into candy-app territory.</p>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

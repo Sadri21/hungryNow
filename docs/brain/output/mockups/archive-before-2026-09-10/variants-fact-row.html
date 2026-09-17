@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Fact row & specialty row variants</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* DECISION AID, not a screen. Delete once a variant is picked.
+
+     Built 2026-09-08 because the `.fact-chip` component turned screen 06's facts into
+     three bordered pills, and Sadri's objection is that the outlined pill is the default
+     shape that appears when nobody decides anything. He's right, and the adopt item was
+     never about pills: reference 008's discipline is ONE treatment reused in the SAME
+     position, which is a rule about consistency, not about rounded rectangles.
+
+     So every variant below is the same component — same fields, same fixed order
+     (distance, price, rating), same reuse on screens 06 and 08. Only the rendering
+     differs. Picking one does not un-adopt `metric-chip-row`.
+
+     EVERY BOX BELOW IS 198px WIDE — the real content width inside the phone frame
+     (242px screen minus 22px padding each side). Judge the crowding, not just the style. */
+
+  body{
+    display:block; background:#15100c; padding:40px 24px 80px;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  h1{color:#F4F5F7; font-size:22px; font-weight:800; margin:0 0 10px;}
+  .lede{color:#A9ACB3; font-size:13px; line-height:1.7; max-width:660px; margin:0 0 6px;}
+  .lede b{color:#F5EFE4;}
+  h2{color:#F5EFE4; font-size:12px; font-weight:800; letter-spacing:.1em;
+     text-transform:uppercase; margin:38px 0 4px; padding-bottom:10px;
+     border-bottom:1px solid rgba(255,255,255,.08);}
+  .grid{display:flex; flex-wrap:wrap; gap:18px; padding-top:18px;}
+
+  /* One candidate: a 198px-wide slice of the real screen ground. */
+  .cand{width:238px;}
+  .cand h3{color:#F5EFE4; font-size:12.5px; font-weight:800; margin:0 0 3px;}
+  .cand .why{color:#8C8175; font-size:10.5px; line-height:1.55; margin:0 0 10px; min-height:46px;}
+  .cand .why em{color:#C7A98F; font-style:normal;}
+  .stage{
+    width:238px; padding:14px 20px; border-radius:12px;
+    background:var(--bg); color:var(--text);
+  }
+  .stage .inner{width:198px;}
+  .verdict{color:#F0A050; font-size:10px; font-weight:800; letter-spacing:.06em;
+           text-transform:uppercase; margin:9px 0 0;}
+  .verdict.no{color:#8C8175;}
+
+  /* Context: the name above the fact row, so crowding is judged in situ. */
+  .ctx-name{font-weight:800; font-size:16px; line-height:1.22; margin:0 0 9px;}
+
+  /* ── FACT ROW VARIANTS ─────────────────────────────────────────────────────── */
+
+  /* A — middot text. The iOS convention: Maps and the App Store both state facts as
+     plain separated text. No container, no border, nothing to draw. */
+  .fr-dot{font-size:10.5px; font-weight:700; color:var(--hero-text);}
+  .fr-dot span{white-space:nowrap;}
+  .fr-dot i{font-style:normal; opacity:.45; padding:0 5px;}
+
+  /* B — hairline dividers. One step more structured than middots: the separator is the
+     same hairline that already divides surfaces everywhere else in the app, so it adds
+     no new visual language. */
+  .fr-rule{display:flex; align-items:center; font-size:10.5px; font-weight:700; color:var(--hero-text);}
+  .fr-rule span{padding-right:10px; margin-right:10px; border-right:1px solid var(--hairline); white-space:nowrap;}
+  .fr-rule span:last-child{border-right:0; padding-right:0; margin-right:0;}
+
+  /* C — value over label. CHOSEN 2026-09-08. Reference 008's actual shape for its metric
+     row: the number is the loud part and a tiny caption says what it is. No containers.
+     I originally caveated this as costing vertical space — measured, it doesn't: a 13px
+     value at line-height 1.1 plus an 8.5px label is ~25px, the same as the 10.5px pill it
+     replaced. The remaining honest objection is that three uppercase micro-labels are
+     their own cliché; Sadri took that trade knowingly. */
+  .fr-col{display:flex; gap:20px;}
+  .fr-col div{display:flex; flex-direction:column; gap:1px;}
+  .fr-col b{font-size:13px; font-weight:800; color:var(--hero-text); line-height:1.1;}
+  .fr-col small{font-size:8.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--text2);}
+
+  /* D — glyph + value. A small symbol carries the meaning instead of a label, so nothing
+     needs a caption and nothing needs a border. Also satisfies the HIG's "never colour
+     alone" rule for free: the walking figure, the price and the star are three different
+     shapes, not three identical pills in the same colour. */
+  .fr-icon{display:flex; gap:13px; font-size:10.5px; font-weight:700; color:var(--hero-text);}
+  .fr-icon span{display:inline-flex; align-items:center; gap:4px; white-space:nowrap;}
+  .fr-icon svg{flex:0 0 auto;}
+
+  /* ── SPECIALTY ROW VARIANTS ────────────────────────────────────────────────── */
+  .sl{list-style:none; margin:0; padding:0;}
+  .sl li{padding:11px 0; border-bottom:1px solid var(--hairline);}
+  .sl li:first-child{border-top:1px solid var(--hairline);}
+  .sl .nm{font-size:12.5px; font-weight:800; line-height:1.3; color:var(--text); margin:0;}
+
+  /* S-A — category as plain text under the name. */
+  .sl-under .cat{font-size:10px; font-weight:700; color:var(--spec-text); margin:3px 0 0;}
+
+  /* S-B — category trailing, baseline-aligned, in the quieter secondary tone. Reads as
+     an attribute of the name rather than a label stuck on it. Long names push it. */
+  .sl-trail li{display:flex; align-items:baseline; gap:10px;}
+  .sl-trail .nm{flex:1; min-width:0;}
+  .sl-trail .cat{font-size:10px; font-weight:700; color:var(--spec-text); white-space:nowrap; flex:0 0 auto;}
+
+  /* S-C — glyph + category under the name. The `foodCategory` icon plan was already on
+     the checklist; here it replaces the pill instead of decorating one. */
+  .sl-glyph .cat{display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:var(--spec-text); margin:4px 0 0;}
+  .sl-glyph svg{flex:0 0 auto;}
+
+  /* S-D — the current pill, for comparison. */
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Fact row &amp; specialty row — pick a rendering</h1>
+  <p class="note" style="font-size:12.5px; color:#F0A050; background:rgba(240,160,80,.08); border-left:2px solid #F0A050; padding:12px 16px; border-radius:4px; margin:0 0 22px; max-width:660px; line-height:1.6;">
+    <b style="color:#F5EFE4;">DECIDED 2026-09-08 — Sadri chose C + S-C.</b> Value-over-label for the facts, glyph + category text for the specialties. Both are live in screens 06 and 08 now. This page is kept only as the record of what was rejected and why; delete it, and the superseded <code>.fact-chip</code> rules in <code>shared.css</code>, together.
+  </p>
+  <p class="lede">Every option is <b>the same component</b>: same fields, same fixed order (distance, price, rating), reused on screens 06 and 08. Only the drawing differs — picking one doesn’t un-adopt <code>metric-chip-row</code>. Each box is <b>198px wide</b>, the real content width inside the phone frame, so the crowding is honest.</p>
+  <p class="lede">The last option in each row is <b>the pill version that was in the mockup</b> before this decision, kept for comparison.</p>
+
+  <h2>The hero fact row — screen 06</h2>
+  <div class="grid">
+
+    <div class="cand">
+      <h3>A · Middot text</h3>
+      <p class="why">What Apple Maps and the App Store actually do. Nothing is drawn — no border, no fill, no radius. <em>Quietest option.</em></p>
+      <div class="stage"><div class="inner">
+        <p class="ctx-name">Restoran Nasi Kandar Ar Rashid</p>
+        <div class="fr-dot"><span>400 m</span><i>·</i><span>Mid-range</span><i>·</i><span>★ 4.7</span></div>
+      </div></div>
+      <p class="verdict no">Not chosen</p>
+    </div>
+
+    <div class="cand">
+      <h3>B · Hairline dividers</h3>
+      <p class="why">The separator is the same hairline that divides surfaces everywhere else, so it introduces no new visual language. <em>Slightly firmer than A.</em></p>
+      <div class="stage"><div class="inner">
+        <p class="ctx-name">Restoran Nasi Kandar Ar Rashid</p>
+        <div class="fr-rule"><span>400 m</span><span>Mid-range</span><span>★ 4.7</span></div>
+      </div></div>
+    </div>
+
+    <div class="cand">
+      <h3>C · Value over label</h3>
+      <p class="why">Reference 008’s real metric shape. Costs vertical space on the screen that can least afford it, and three uppercase micro-labels are their own cliché.</p>
+      <div class="stage"><div class="inner">
+        <p class="ctx-name">Restoran Nasi Kandar Ar Rashid</p>
+        <div class="fr-col">
+          <div><b>400 m</b><small>away</small></div>
+          <div><b>$$</b><small>price</small></div>
+          <div><b>4.7</b><small>rating</small></div>
+        </div>
+      </div></div>
+      <p class="verdict">CHOSEN</p>
+    </div>
+
+    <div class="cand">
+      <h3>D · Glyph + value</h3>
+      <p class="why">Three different shapes instead of three identical pills — which also satisfies “never colour alone” for free. Uses the icon budget you were going to spend anyway.</p>
+      <div class="stage"><div class="inner">
+        <p class="ctx-name">Restoran Nasi Kandar Ar Rashid</p>
+        <div class="fr-icon">
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13" cy="4" r="2"/><path d="M12 8l-2 5 3 2 1 5"/><path d="M10 13l-3 2"/><path d="M14 8l3 3"/></svg>400 m</span>
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18"/><path d="M16 7.5c0-2-1.8-3-4-3s-4 1-4 3 1.8 2.7 4 3.3 4 1.3 4 3.2-1.8 3-4 3-4-1-4-3"/></svg>Mid</span>
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3l2.6 5.6 6 .7-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.3l6-.7z"/></svg>4.7</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="cand">
+      <h3>E · Bordered pills</h3>
+      <p class="why">What’s in the mockup right now. Three outlined containers for three short facts — the shape that shows up when nobody decides anything.</p>
+      <div class="stage"><div class="inner">
+        <p class="ctx-name">Restoran Nasi Kandar Ar Rashid</p>
+        <div class="hero-meta">
+          <span class="fact-chip hero">400 m</span>
+          <span class="fact-chip hero">Mid-range</span>
+          <span class="fact-chip hero">★ 4.7</span>
+        </div>
+      </div></div>
+      <p class="verdict no">Was in the mockup</p>
+    </div>
+
+  </div>
+
+  <h2>The specialty list — screen 06</h2>
+  <div class="grid">
+
+    <div class="cand">
+      <h3>S-A · Category under the name</h3>
+      <p class="why">No container at all. The pistachio tone alone marks it as specialty, and the hairline between rows does the separating. <em>Long names never get squeezed.</em></p>
+      <div class="stage"><div class="inner">
+        <ul class="sl sl-under">
+          <li><p class="nm">Warung Nasi Ibu Oka</p><p class="cat">Babi Guling</p></li>
+          <li><p class="nm">Sate Babi Bawah Pohon</p><p class="cat">Satay</p></li>
+          <li><p class="nm">Kedai Kopi Bhineka Djaja</p><p class="cat">Coffee</p></li>
+        </ul>
+      </div></div>
+      <p class="verdict no">Not chosen</p>
+    </div>
+
+    <div class="cand">
+      <h3>S-B · Category trailing</h3>
+      <p class="why">Reads as an attribute of the name rather than a label stuck to it, and saves a line per row. A long name squeezes it — see row 3.</p>
+      <div class="stage"><div class="inner">
+        <ul class="sl sl-trail">
+          <li><p class="nm">Warung Nasi Ibu Oka</p><span class="cat">Babi Guling</span></li>
+          <li><p class="nm">Sate Babi Bawah Pohon</p><span class="cat">Satay</span></li>
+          <li><p class="nm">Kedai Kopi Bhineka Djaja</p><span class="cat">Coffee</span></li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="cand">
+      <h3>S-C · Glyph + category</h3>
+      <p class="why">The <code>foodCategory</code> icon plan replaces the pill instead of decorating one. Costs one icon per category in the bundled set.</p>
+      <div class="stage"><div class="inner">
+        <ul class="sl sl-glyph">
+          <li><p class="nm">Warung Nasi Ibu Oka</p>
+            <p class="cat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8.5 9.5c.8-1.2 2-1.8 3.5-1.8s2.7.6 3.5 1.8"/></svg>Babi Guling</p></li>
+          <li><p class="nm">Sate Babi Bawah Pohon</p>
+            <p class="cat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 18L18 6"/><circle cx="10.5" cy="13.5" r="2.1"/><circle cx="14.5" cy="9.5" r="2.1"/></svg>Satay</p></li>
+          <li><p class="nm">Kedai Kopi Bhineka Djaja</p>
+            <p class="cat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 7h11v6a5.5 5.5 0 0 1-11 0z"/><path d="M17 8h2.5a2 2 0 0 1 0 4H17"/></svg>Coffee</p></li>
+        </ul>
+      </div></div>
+      <p class="verdict">CHOSEN</p>
+    </div>
+
+    <div class="cand">
+      <h3>S-D · Pill tag</h3>
+      <p class="why">What’s in the mockup right now. Three outlined pills stacked down the screen, directly under a fact row that was also pills.</p>
+      <div class="stage"><div class="inner">
+        <ul class="spec-list" style="margin-bottom:0">
+          <li class="spec-item"><p class="spec-name">Warung Nasi Ibu Oka</p><span class="fact-chip calm">Babi Guling</span></li>
+          <li class="spec-item"><p class="spec-name">Sate Babi Bawah Pohon</p><span class="fact-chip calm">Satay</span></li>
+          <li class="spec-item"><p class="spec-name">Kedai Kopi Bhineka Djaja</p><span class="fact-chip calm">Coffee</span></li>
+        </ul>
+      </div></div>
+      <p class="verdict no">Was in the mockup</p>
+    </div>
+
+  </div>
+
+  <h2>What I’d change and why</h2>
+  <p class="lede"><b>A + S-A.</b> Together they remove eleven drawn containers from one screen and leave the two things that were already carrying the hierarchy — the pomegranate/pistachio tone split, and the hairline. That also fixes something the pills were quietly costing you: <b>the hero card and the specialty list looked like the same kind of object</b>, because both were pills on a hairline. With A + S-A the hero keeps the only filled surface on the screen and the specialties are plainly secondary, which is the whole point of the hero/specialty distinction.</p>
+  <p class="lede">Where pills <b>should</b> stay: the location chip in the app bar (it’s a floating status element with nothing around it to anchor to, so it needs an edge) and the buttons (a capsule button is an actual iOS convention, not a default). Removing those too would be over-correcting.</p>
+</div>
+</body>
+</html>

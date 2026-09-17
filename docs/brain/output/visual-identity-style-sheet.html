@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Pomegranate & Pistachio</title>
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#15100c;
+    padding:56px 24px 96px;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .wrap{max-width:1040px;margin:0 auto;}
+
+  .intro{color:#B7ADA0; max-width:720px; margin:0 0 40px;}
+  .intro .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8C8175; margin:0 0 10px;}
+  .intro h1{color:#F5EFE4; font-size:28px; font-weight:700; margin:0 0 14px; letter-spacing:-.01em;}
+  .intro p{font-size:14px; line-height:1.7; margin:0 0 10px;}
+  .intro .revision{
+    font-size:13px; line-height:1.6; color:#F0A050; border-left:2px solid #F0A050; padding-left:14px; margin:22px 0 0;
+    background:rgba(240,160,80,.08); padding:14px 16px; border-radius:4px;
+  }
+  .intro .revision b{color:#F5EFE4;}
+
+  .pair{display:flex; gap:32px; flex-wrap:wrap; margin-bottom:40px;}
+  .mode{flex:1 1 460px; min-width:340px; border-radius:8px; padding:40px 36px 44px;}
+  .mode-tag{font-size:11px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 4px; opacity:.7;}
+  .mode-name{font-size:22px; font-weight:700; margin:0 0 30px;}
+
+  .label{font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin:0 0 12px; opacity:.65;}
+  .swatches{display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap;}
+  .chip{flex:1 1 90px; border-radius:8px; padding:12px 10px; min-height:60px; display:flex; flex-direction:column; justify-content:flex-end;}
+  .chip .name{font-size:10px; font-weight:700; margin:0 0 2px;}
+  .chip .hex{font-family:ui-monospace, "SF Mono", Menlo, monospace; font-size:9px; opacity:.85; margin:0;}
+  .chip .role{font-size:9px; opacity:.7; margin:2px 0 0; line-height:1.3;}
+
+  .phone{border-radius:22px; padding:26px 22px; border:1px solid var(--rule); position:relative;}
+  .phone .notch-label{font-size:10px; text-transform:uppercase; letter-spacing:.12em; opacity:.55; margin:0 0 22px;}
+  .cta-btn{
+    display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600;
+    padding:11px 20px; border-radius:100px; margin-bottom:26px; border:1.5px solid var(--hero-text);
+    color:var(--hero-text); background:var(--hero-fill-bg);
+  }
+  .cta-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--hero-text);}
+
+  .hero-label{font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 10px; color:var(--hero-text); font-weight:700;}
+  .hero-card{border-radius:14px; padding:20px 20px 22px; margin-bottom:28px; background:var(--elevated);}
+  .hero-name{font-weight:700; font-size:19px; margin:0 0 8px;}
+  .hero-reason{font-size:12.5px; line-height:1.6; margin:0 0 16px; opacity:.85; max-width:320px;}
+  .hero-meta{display:flex; gap:16px; font-size:11px; margin:0; letter-spacing:.02em; opacity:.8; font-weight:600;}
+  .hero-meta span{display:flex; align-items:center; gap:4px;}
+
+  .spec-label{font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 11px; opacity:.65; font-weight:700;}
+  .spec-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .spec-chip{font-size:12px; font-weight:600; padding:7px 13px; border-radius:100px; border:1.5px solid var(--spec-text); color:var(--spec-text); background:var(--spec-fill-bg);}
+
+  /* LIGHT — Pomegranate & Pistachio */
+  .light{background:#F7F1EF; color:#2B1512;
+    --rule:#E7D9D4; --elevated:#F0E2DE;
+    --hero-text:#8A1E33; --hero-fill-bg:rgba(166,36,61,.12);
+    --spec-text:#4F6A38; --spec-fill-bg:rgba(143,168,118,.16);
+  }
+  .light .mode-tag, .light .label{color:#6B564F;}
+  .light .swatches .chip:nth-child(1){background:#2B1512; color:#F7F1EF;}
+  .light .swatches .chip:nth-child(2){background:#F0E2DE; color:#2B1512; border:1px solid #E7D9D4;}
+  .light .swatches .chip:nth-child(3){background:#6B564F; color:#F7F1EF;}
+  .light .swatches .chip:nth-child(4){background:#A6243D; color:#fff;}
+  .light .swatches .chip:nth-child(5){background:#8A1E33; color:#F7F1EF;}
+  .light .swatches .chip:nth-child(6){background:#8FA876; color:#16260A;}
+  .light .swatches .chip:nth-child(7){background:#4F6A38; color:#F7F1EF;}
+  .light .phone{background:#F7F1EF;}
+  .light .notch-label{color:#6B564F;}
+  .light .hero-reason,.light .hero-meta{color:#6B564F;}
+
+  /* DARK — Pomegranate & Pistachio */
+  .dark{background:#241016; color:#F5E7E2;
+    --rule:#4A2B34; --elevated:#301A22;
+    --hero-text:#F58396; --hero-fill-bg:rgba(245,131,150,.14);
+    --spec-text:#B9CC9E; --spec-fill-bg:rgba(185,204,158,.12);
+  }
+  .dark .mode-tag, .dark .label{color:#C7A9A0;}
+  .dark .swatches .chip:nth-child(1){background:#F5E7E2; color:#241016;}
+  .dark .swatches .chip:nth-child(2){background:#301A22; color:#F5E7E2; border:1px solid #4A2B34;}
+  .dark .swatches .chip:nth-child(3){background:#C7A9A0; color:#241016;}
+  .dark .swatches .chip:nth-child(4){background:#F58396; color:#380510;}
+  .dark .swatches .chip:nth-child(5){background:#F58396; color:#380510;}
+  .dark .swatches .chip:nth-child(6){background:#B9CC9E; color:#16260A;}
+  .dark .swatches .chip:nth-child(7){background:#B9CC9E; color:#16260A;}
+  .dark .phone{background:#241016;}
+  .dark .notch-label{color:#C7A9A0;}
+  .dark .hero-reason,.dark .hero-meta{color:#C7A9A0;}
+
+  .backup{background:#1C1712; border-radius:12px; padding:28px 30px 30px; margin-bottom:8px;}
+  .backup .label{color:#9A9082;}
+  .backup h3{color:#F4F2EE; font-size:16px; font-weight:700; margin:0 0 6px;}
+  .backup p{color:#B0A895; font-size:13px; line-height:1.6; margin:0 0 20px; max-width:640px;}
+  .backup .swatches .chip:nth-child(1){background:#241C15; color:#F4F2EE;}
+  .backup .swatches .chip:nth-child(2){background:#EAE5DC; color:#241C15; border:1px solid #E1DAD0;}
+  .backup .swatches .chip:nth-child(3){background:#C1440E; color:#fff;}
+  .backup .swatches .chip:nth-child(4){background:#A2380C; color:#fff;}
+  .backup .swatches .chip:nth-child(5){background:#D9A404; color:#2A1D00;}
+  .backup .swatches .chip:nth-child(6){background:#8A6200; color:#fff;}
+  .backup .swatches div.chip span.hex{opacity:.9;}
+
+  .footnote{color:#8C8175; font-size:12px; line-height:1.7; max-width:720px; margin-top:24px;}
+  .footnote b{color:#B7ADA0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <p class="eyebrow">HungryNow — Visual Identity</p>
+    <h1>Pomegranate & Pistachio</h1>
+    <p>One system, two required appearances. Deep pomegranate red marks the single hero recommendation; soft pistachio green marks the specialty picks — the color alone tells the tourist which of HungryNow's two answers they're looking at, before they read a word.</p>
+    <p class="revision"><b>Landed here after five rounds of options</b> (15 palettes total): "Night Ledger" was too dark/formal, its replacement "Golden Hour" turned out too close to the generic warm-neutral palette a lot of AI tools default to. Blue/teal/navy got eliminated in every round it appeared. Pomegranate & Pistachio is the jewel-toned finalist — grounded "Rust & Mustard" is kept as a fully-specified, swappable backup (see bottom of page), built on the same token names so switching later needs no code changes.</p>
+  </div>
+
+  <div class="pair">
+    <!-- LIGHT -->
+    <div class="mode light">
+      <p class="mode-tag">Light appearance</p>
+      <h2 class="mode-name">Pomegranate & Pistachio</h2>
+
+      <p class="label">Color roles</p>
+      <div class="swatches">
+        <div class="chip"><p class="name">Aubergine</p><p class="hex">#2B1512</p><p class="role">Primary text · 15.4:1</p></div>
+        <div class="chip"><p class="name">Blush / Elevated</p><p class="hex">#F7F1EF / #F0E2DE</p><p class="role">Background / card</p></div>
+        <div class="chip"><p class="name">Warm Brown</p><p class="hex">#6B564F</p><p class="role">Secondary text · 6.1:1</p></div>
+        <div class="chip"><p class="name">Pomegranate surface</p><p class="hex">#A6243D</p><p class="role">Fills, icon tint</p></div>
+        <div class="chip"><p class="name">Pomegranate text</p><p class="hex">#8A1E33</p><p class="role">Hero accent · 8.1:1</p></div>
+        <div class="chip"><p class="name">Pistachio surface</p><p class="hex">#8FA876</p><p class="role">Fills, icon tint</p></div>
+        <div class="chip"><p class="name">Pistachio text</p><p class="hex">#4F6A38</p><p class="role">Specialty accent · 5.4:1</p></div>
+      </div>
+
+      <p class="label">Screen mockup</p>
+      <div class="phone">
+        <p class="notch-label">HungryNow</p>
+        <div class="cta-btn"><span class="dot"></span> Find me something good</div>
+
+        <p class="hero-label">Hero pick</p>
+        <div class="hero-card">
+          <p class="hero-name">Kedai Nasi Kandar Rashid</p>
+          <p class="hero-reason">Best value within 5 minutes — locals queue here at lunch for the beef rendang, and it's half the price of the tourist-strip spots.</p>
+          <div class="hero-meta">
+            <span>📍 0.4 mi</span><span>$$</span><span>★ 4.7</span>
+          </div>
+        </div>
+
+        <p class="spec-label">Also nearby</p>
+        <div class="spec-row">
+          <span class="spec-chip">🍜 Ramen</span>
+          <span class="spec-chip">🍣 Sushi</span>
+          <span class="spec-chip">🍢 Satay</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DARK -->
+    <div class="mode dark">
+      <p class="mode-tag">Dark appearance</p>
+      <h2 class="mode-name">Pomegranate & Pistachio</h2>
+
+      <p class="label">Color roles</p>
+      <div class="swatches">
+        <div class="chip"><p class="name">Blush</p><p class="hex">#F5E7E2</p><p class="role">Primary text · 15.0:1</p></div>
+        <div class="chip"><p class="name">Wine-black / Elevated</p><p class="hex">#241016 / #301A22</p><p class="role">Background / card</p></div>
+        <div class="chip"><p class="name">Dusty Rose</p><p class="hex">#C7A9A0</p><p class="role">Secondary text · 8.3:1</p></div>
+        <div class="chip"><p class="name">Bright Pomegranate</p><p class="hex">#F58396</p><p class="role">Fills, icon tint</p></div>
+        <div class="chip"><p class="name">Bright Pomegranate</p><p class="hex">#F58396</p><p class="role">Hero accent · 7.4:1</p></div>
+        <div class="chip"><p class="name">Bright Pistachio</p><p class="hex">#B9CC9E</p><p class="role">Fills, icon tint</p></div>
+        <div class="chip"><p class="name">Bright Pistachio</p><p class="hex">#B9CC9E</p><p class="role">Specialty accent · 10.5:1</p></div>
+      </div>
+
+      <p class="label">Screen mockup</p>
+      <div class="phone">
+        <p class="notch-label">HungryNow</p>
+        <div class="cta-btn"><span class="dot"></span> Find me something good</div>
+
+        <p class="hero-label">Hero pick</p>
+        <div class="hero-card">
+          <p class="hero-name">Kedai Nasi Kandar Rashid</p>
+          <p class="hero-reason">Best value within 5 minutes — locals queue here at lunch for the beef rendang, and it's half the price of the tourist-strip spots.</p>
+          <div class="hero-meta">
+            <span>📍 0.4 mi</span><span>$$</span><span>★ 4.7</span>
+          </div>
+        </div>
+
+        <p class="spec-label">Also nearby</p>
+        <div class="spec-row">
+          <span class="spec-chip">🍜 Ramen</span>
+          <span class="spec-chip">🍣 Sushi</span>
+          <span class="spec-chip">🍢 Satay</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="backup">
+    <p class="label">Swappable backup — same token names, different values</p>
+    <h3>Rust & Mustard</h3>
+    <p>Kept fully specified so switching mid-development is a value swap in the Asset Catalog, not a redesign. Rust (hero) + mustard (specialty) on warm neutral gray — grounded, spice-market, less sweet than the primary. Full light + dark tables with contrast ratios: <code>wiki/concepts/visual-identity.md</code>.</p>
+    <div class="swatches">
+      <div class="chip"><p class="name">Charcoal (L)</p><p class="hex">#241C15</p></div>
+      <div class="chip"><p class="name">Gray / Elevated (L)</p><p class="hex">#F4F2EE</p></div>
+      <div class="chip"><p class="name">Rust surface</p><p class="hex">#C1440E</p></div>
+      <div class="chip"><p class="name">Rust text</p><p class="hex">#A2380C</p></div>
+      <div class="chip"><p class="name">Mustard surface</p><p class="hex">#D9A404</p></div>
+      <div class="chip"><p class="name">Mustard text</p><p class="hex">#8A6200</p></div>
+    </div>
+  </div>
+
+  <p class="footnote">Rendered here with <b>ui-rounded</b> (Safari) falling back to system sans elsewhere — in SwiftUI this is <b>zero-cost</b>: <code>Font.system(_:design: .rounded)</code>, no bundled font files, full Dynamic Type support. Numerals use <code>.monospacedDigit()</code> on the same family rather than a separate monospace typeface. Full spec, contrast math, token-swap architecture, and rationale: <code>wiki/concepts/visual-identity.md</code>.</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Nothing nearby</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 08 only. Layout comes from the shared .screen-state block.
+
+     `.radius-note` REMOVED 2026-09-08. It was a one-off pill with its own border, fill
+     and padding rules that duplicated the shared fact component exactly — the same idea
+     drawn twice, which is what adopt item 1 (`metric-chip-row`) exists to stop. It now
+     uses `.fact-row.calm` from shared.css, like every other stated fact in the app.
+     (Briefly `.fact-chip.calm` earlier the same day, before the pill rendering was
+     dropped altogether — see shared.css.)
+
+     It also said the same thing as the sentence directly above it ("only looks about
+     1.5 km out" / "Searched 1.5 km around you"). The chip keeps the number, so the body
+     copy drops it and spends its words on what the reader can actually do instead. */
+</style>
+</head>
+<body>
+  <p class="screen-title">08 · Nothing nearby<span>Maps the API&#39;s 404 <code>no_results</code>. An empty state, not an error — nothing failed, there is simply no food here. HIG: an empty state must offer a next action, so it names the one thing that changes the outcome (move, or wait).</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-state">
+      <div class="softbg"><span class="s1"></span><span class="s2"></span></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+
+        <div class="appbar">
+          <p class="bar-title">HungryNow</p>
+          <span class="state-chip">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>
+            </svg>
+            Nusa Penida
+          </span>
+        </div>
+
+        <div class="state-mid">
+          <div class="state-icon calm">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+              <path d="M4 12h16"/><path d="M6 12a6 6 0 0 1 12 0"/><path d="M9.5 6.6c0-1.4 1.1-2.6 2.5-2.6s2.5 1.2 2.5 2.6"/>
+              <path d="M3 16h18"/>
+            </svg>
+          </div>
+          <p class="state-headline">No restaurants within walking distance</p>
+          <p class="state-body">A good answer here is a walk away rather than a tap away. Move a little and try again.</p>
+          <!-- Same shared component as screen 06's hero row, in its one-column form and
+               `.calm` variant. A sentence in a pill was never a fact row; a value with a
+               label naming it is. See shared.css for why the pill rendering went. -->
+          <div class="fact-row calm">
+            <div class="fact"><p class="fact-value">1.5 km</p><p class="fact-label">searched around you</p></div>
+          </div>
+        </div>
+
+        <div class="state-cta">
+          <div class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/>
+            </svg>
+            Try again
+          </div>
+          <p class="privacy-note">Same tap, new location — the answer changes as you move</p>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</body>
+</html>

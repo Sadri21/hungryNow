@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Location off</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 07 only. Layout comes from the shared .screen-state block; this file
+     holds just what is specific to the denied-permission dead end. */
+  .screen-state .steps{
+    display:flex; flex-direction:column; gap:6px; text-align:left;
+    background:var(--elevated); border-radius:14px; padding:12px 14px; margin-top:2px;
+  }
+  .screen-state .steps p{font-size:10.5px; line-height:1.5; color:var(--text2); margin:0; display:flex; gap:7px;}
+  .screen-state .steps span{color:var(--hero-text); font-weight:800; flex:0 0 auto;}
+</style>
+</head>
+<body>
+  <p class="screen-title">07 · Location off — the dead end<span>The one edge case that is not recoverable in-app: the button on Home physically cannot work. So Home never shows that button in this state — it shows this instead, with the only action that helps (deep link to Settings) and the exact toggle to look for.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-state">
+      <div class="softbg"><span class="s1"></span><span class="s2"></span></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+
+        <div class="appbar">
+          <p class="bar-title">HungryNow</p>
+          <span class="state-chip off">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><path d="M4 4l16 16"/>
+            </svg>
+            Location off
+          </span>
+        </div>
+
+        <div class="state-mid">
+          <div class="state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M12 21s7-7.2 7-12a7 7 0 0 0-11.4-5.4"/><path d="M5.6 5.7A7 7 0 0 0 5 9c0 4.8 7 12 7 12"/>
+              <path d="M4 4l16 16"/>
+            </svg>
+          </div>
+          <p class="state-headline">Location is turned off</p>
+          <p class="state-body">HungryNow finds food near you, so it needs location access to work at all. Turning it back on takes two taps.</p>
+          <div class="steps">
+            <p><span>1</span> Open Settings → HungryNow</p>
+            <p><span>2</span> Tap Location → While Using the App</p>
+          </div>
+        </div>
+
+        <div class="state-cta">
+          <div class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>
+            </svg>
+            Open Settings
+          </div>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+  <p class="callout">One button on purpose. A “Not now” would return to a Home screen whose only button cannot work — there is nothing else in the app to do without location.</p>
+</body>
+</html>

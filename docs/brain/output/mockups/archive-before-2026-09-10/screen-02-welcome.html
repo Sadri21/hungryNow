@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Welcome</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 02 only. Scoped to .screen-welcome — nothing here can affect the other screens.
+
+     SUPERGRAPHIC REBUILD 2026-09-07. Replaces the floating transparent-PNG illustration
+     AND the blurred decorative circles. Reason (Sadri's): 02 and 04 were both "art floating
+     on soft blurred circles", so the two screens read as the same screen. Differentiation
+     now comes from structure, not from swapping one picture for another —
+       02 = edge-to-edge geometric mosaic band, no blur anywhere
+       04 = centred floating illustration on the shared .softbg circles
+     Both still obviously the same app, because the palette and radius language are shared.
+     Decision recorded in wiki/concepts/reference-adoption.md; technique catalogued as
+     `supergraphic-mosaic` from reference 005 in the design-reference set.
+
+     GEOMETRY. Screen is 242 x 532; content area 504 after the 28px status bar.
+       Band: 272 x 200 at left:-15px, so it overhangs the 242px screen by 15px on BOTH
+       sides and gets cropped there. That crop is the whole point — a supergraphic is
+       defined by being larger than its frame.
+       The asset is authored 1.36:1 (272:200) so object-fit:cover never re-crops it.
+
+     STATUS BAR COLLISION — solved in the ASSET, not avoided in the layout. The band runs
+     to y=0, under the status bar, because stopping below it would kill the top bleed. The
+     asset's top strip is therefore pale by construction: measured 0.000% ink in the top
+     20%, darkest tone there ~#D798A0, which clears aubergine status-bar text comfortably.
+     Any replacement asset MUST be re-measured for this before it goes in. This is exactly
+     the defect reference 005 left unresolved (its mosaic bled off the top with no status
+     bar drawn at all).
+
+     VERTICAL BUDGET of the 504px content area:
+       184 padding-top (172 to clear the band + 12 breathing) + 22 wordmark + 48 tagline
+       + 108 purpose + 99 CTA = 461, i.e. ~43px slack.
+     That is MORE slack than the 19px the floating-PNG layout had, so this version is the
+     safer one on space as well. The old constraint still applies though: tagline 2 lines,
+     purpose 4 lines. */
+
+  /* GROUND TONE (2026-09-07). Sadri: the area below the band read as "just white".
+     Fixed the way reference 008 does it — a tinted screen ground with value-based
+     hierarchy — rather than by adding decoration on top of a white field:
+       screen ground  --bg  ->  --elevated   (the warmer, deeper tone)
+       purpose card   --elevated -> --bg      (the warm off-white, + a hairline)
+     That inverts the elevation: the card is the lighter surface on a tinted ground.
+     PURE WHITE WAS TRIED AND REJECTED (2026-09-07) — it measured better (1.26:1 vs the
+     ground instead of 1.13:1) but at real size it read as a bright sticker pasted on,
+     because this palette is deliberately warm. A contrast number is not a temperature
+     judgement. --bg + hairline is warm-on-warm and sits in the screen.
+     The hairline is doing real work here and is not optional: 3:1 is the threshold for a
+     surface boundary carried by tone alone, and NO light-mode surface pair in this palette
+     reaches it (--bg/--elevated 1.13:1, white/--elevated 1.26:1). In a palette valued this
+     closely, cards need a border. That is systemic, not a screen-02 detail.
+     Contrast: ground TextPrimary 13.65:1 / TextSecondary 5.42:1; card 15.41:1 / 6.12:1.
+
+     GROUND IS NOW A SHARED TOKEN (2026-09-07). Screens 01 and 03 both have to match this
+     tone — 01 so the launch transition is invisible, 03 because it draws this screen behind
+     the system alert. All three read --welcome-ground; change the tone there, not here. */
+  .screen-welcome{background:var(--welcome-ground);}
+
+  .screen-welcome .content{
+    align-items:center; justify-content:flex-start;
+    padding-top:184px; position:relative; z-index:1;
+  }
+  .screen-welcome .wordmark{margin-top:0;}
+  .screen-welcome .tagline{max-width:190px; margin-top:8px;}
+  .screen-welcome .cta-wrap{position:relative; width:100%; margin-top:auto; padding-bottom:30px;}
+
+  /* LOWER-AREA SHAPES. Two hard-edged circles bleeding off the frame, echoing the band's
+     geometry. Deliberately NOT the blurred .softbg circles used by 04-09 — no blur here,
+     because hard geometry versus soft blur is exactly what keeps 02 and 04 distinct.
+     Placed so it never sits under body text — it passes behind the opaque CTA only. */
+  .welcome-shapes{position:absolute; left:0; right:0; top:200px; bottom:0; overflow:hidden; z-index:0;}
+  .welcome-shapes span{position:absolute; border-radius:50%;}
+  .welcome-shapes .c1{width:300px; height:300px; background:var(--sg-spec-1); left:-150px; bottom:-150px;}
+  /* A second circle (.c2, rose, right edge at top:70px) was removed 2026-09-07. It sat
+     directly BEHIND the purpose card, so almost none of it was visible — it contributed
+     nothing except noise at the card's right edge. Rendering the card on a transparent
+     fill made the problem obvious: the circle showed straight through the content block.
+     One confident corner arc beats two arbitrary circles. */
+
+  /* ── The supergraphic ────────────────────────────────────────────────────────────── */
+  /* Now a generated asset, not a CSS grid. The hand-built 4x3 grid read as rigid (Sadri,
+     2026-09-07) — uniform cells are rigid by construction, which is the one thing this
+     technique cannot afford. Prompt and post-processing recipe in app-mockups.md.
+
+     welcome-supergraphic.png is 816x600 (@3x for this 272x200 box) and every pixel is
+     quantised to exactly seven palette tokens, so no gradient or soft shadow survived
+     from the generator. Row-1-pale still holds: 0.000% ink in the top 20%.
+
+     `.sg` MOVED TO shared.css on 2026-09-07 — screen 03 now draws this same band behind
+     the system alert instead of keeping a stale hand-made copy of this screen, so the rule
+     had to be shared. Edit the geometry there, not here. */
+
+  /* Kept for reference — the CSS-grid fallback if the asset is ever dropped.
+     .sg-grid{display:grid; grid-template-columns:repeat(4,68px); grid-template-rows:40px 80px 80px;}
+     .sg-grid > div{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;} */
+
+
+
+
+  /* The permission purpose block — this screen IS the pre-permission screen.
+     (Carried over verbatim from the pre-supergraphic version. Do not drop this in a
+     full-file rewrite — that has already happened once on screen 06's footer.) */
+  /* SHAPE, revised 2026-09-07 (third attempt at this card). Sadri, twice: it doesn't
+     belong to the screen. He was right, and the fault was never the fill — it was that a
+     symmetric inset rounded rectangle with a hairline shares nothing with the band above
+     it. The band's two defining properties are (a) it bleeds off the frame and (b) its
+     geometry is asymmetric. So the card now does both:
+       - bleeds off the LEFT edge (margin-left:-22px cancels .content's padding), with
+         padding-left restoring the 22px text inset, so only colour crosses the edge
+       - one large radius on the bottom-right (34px), small on the top-right (14px),
+         square where it meets the screen edge
+     That is `asymmetric-corner-radius` from references 006/008 — already item 7 on the
+     adopt list in reference-adoption.md — plus the band's own edge-bleed logic.
+     Fill stays --bg: the earlier pure-white experiment was rejected on temperature.
+     border-left is dropped because at margin -22px it would land exactly on x=0 and draw
+     a 1px line down the screen edge. */
+  .purpose{
+    display:flex; gap:9px; align-items:flex-start; text-align:left;
+    align-self:stretch; margin-left:-22px; margin-top:16px;
+    background:var(--bg);
+    border:1px solid var(--hairline); border-left:0;
+    border-radius:0 14px 34px 0;
+    padding:13px 15px 15px 22px;
+  }
+  .purpose svg{flex:0 0 auto; margin-top:1px; color:var(--hero-text);}
+  .purpose p{font-size:11px; line-height:1.55; color:var(--text2); margin:0;}
+  .purpose b{color:var(--text); font-weight:800;}
+</style>
+</head>
+<body>
+  <p class="screen-title">02 · Welcome + location purpose<span>Merged: Welcome and the permission pre-prompt are one screen. HIG allows folding an essential permission into onboarding to explain the benefit — and HungryNow is pointless without location. One button, &quot;Continue&quot; not &quot;Allow&quot;, no way to dismiss past it. Art is now a full-bleed geometric supergraphic, so this screen no longer reads like screen 04.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-welcome">
+
+      <!-- Supergraphic band. 4x68 grid on a 242px screen, shifted -15px so cells crop at
+           both edges. Row 1 pale only — the status bar sits on it. -->
+      <div class="sg" aria-hidden="true">
+        <img src="welcome-supergraphic.png" alt="">
+      </div>
+      <div class="welcome-shapes" aria-hidden="true"><span class="c1"></span></div>
+
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+        <p class="wordmark">HungryNow</p>
+        <p class="tagline">New city? One tap, one honest answer.</p>
+
+        <div class="purpose">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>
+          </svg>
+          <p><b>Location, only on tap.</b> Finds real places within walking distance. Nothing stored, nothing shared.</p>
+        </div>
+
+        <div class="cta-wrap">
+          <div class="btn-primary">Continue</div>
+          <p class="privacy-note">iOS asks for permission next</p>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+  <p class="callout">Supergraphic band: generated asset, quantised to exactly seven palette tokens (no gradient or soft shadow survives), cropped to 1.36:1 and shifted −15px so it bleeds at both edges. Top strip pale by construction — 0% ink in the top 20% — because the status bar sits on it. One hand edit: the large solid dome at the bottom edge was recoloured aubergine→sage, because a heavy dark mass directly above a centred wordmark competes with it.</p>
+</body>
+</html>

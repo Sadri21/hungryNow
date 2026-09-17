@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>HungryNow app icon — foreground layer (bowl + ping)</title>
+  <!--
+    ALTERNATIVE, food-forward. Drops the map pin entirely: a rimmed bowl with
+    one arc above it, the arc doing double duty as steam and as screen 05's
+    radar sweep. Most legible "food" of every candidate drawn, and it holds at
+    29pt trivially because it is two fat forms. What it gives up is "near me".
+
+    Two things learned drawing this, worth not repeating:
+      - If the arc TOUCHES the rim it becomes a handle and the mark reads as a
+        picnic/shopping basket — the exact grocery-app trap Decision 3 rejected
+        the pomegranate for. The 104-unit clearance below is load-bearing.
+      - The rim overhang is what makes it a bowl instead of a dome. Without it
+        the shape reads as a half-disc.
+
+    Geometry (locked):
+      Rim       capsule x 242 -> 782, y 512 -> 564, r 26 caps
+      Body      x 288 -> 736 at y 564, elliptical arc rx 224 ry 200 -> base 764
+      Arc       r 200 about (512, 548), 112deg span, 60 stroke, round caps;
+                endpoints (356, 348), apex y 348-... clear of the rim by 104
+    Content bbox 540 x 576, centred on (512, 512).
+  -->
+  <g fill="#A6243D">
+    <path d="M 268 512 L 756 512 A 26 26 0 0 1 782 538 A 26 26 0 0 1 756 564
+             L 736 564 A 224 200 0 0 1 288 564
+             L 268 564 A 26 26 0 0 1 242 538 A 26 26 0 0 1 268 512 Z"/>
+    <path d="M 356 348 A 200 200 0 0 1 668 348"
+          fill="none" stroke="#A6243D" stroke-width="60" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Launch screen</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 01 only. Moved out of shared.css 2026-09-07.
+
+     GROUND TRACKS SCREEN 02 — now structurally, not by hand. `apple-hig-patterns.md` ->
+     Launching: a launch screen "should look nearly identical to your first real screen
+     (same solid colors ...) so the transition is invisible".
+
+     This used to read `var(--elevated)` with a comment instructing whoever changed screen
+     02's ground to come back and change it here in the same commit. That instruction was
+     itself the second attempt at keeping the claim true by hand, so on 2026-09-07 it was
+     replaced by the shared --welcome-ground token: screens 01, 02 and 03 all read the same
+     token, and the tone can only be changed in one place. Do not name --elevated here. */
+  .screen-launch{background:var(--welcome-ground);}
+  .screen-launch .content{align-items:center; justify-content:center;}
+</style>
+</head>
+<body>
+  <p class="screen-title">01 · Launch screen<span>Icon mark only, no text, no animation, ground tracks Screen 02 (now --elevated) so the launch-to-welcome transition is invisible. Gone in under a second. (HIG note: strictly a launch screen should carry no logo — a deliberate small departure.)</span></p>
+  <div class="device">
+  <div class="island"></div>
+  <div class="screen screen-launch">
+  <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+  <div class="content">
+  <div class="mark">
+  <!-- Two-tone mark, so it can't ride on a single inherited currentColor — it uses the
+       tokens directly instead. Still tokens, no literals: see the glyph-colour rule in
+       shared.css. -->
+  <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+  <circle cx="13" cy="7" r="4.2" fill="var(--hero-text)"/>
+  <circle cx="7" cy="15" r="4.2" fill="var(--hero-surface)"/>
+  <circle cx="19" cy="15" r="4.2" fill="var(--hero-surface)"/>
+  <circle cx="13" cy="20" r="3.4" fill="var(--hero-text)"/>
+  </svg>
+  </div>
+  </div>
+  <div class="home-indicator"></div>
+  </div>
+  </div>
+</body>
+</html>

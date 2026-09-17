@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Home</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 04 only. Scoped to .screen-home — nothing here can affect screens 01-03. */
+  .screen-home .content{justify-content:space-between; padding-top:10px; padding-bottom:34px; position:relative; z-index:1;}
+
+  /* Header is now the shared .appbar in shared.css — same bar as 05, 06 and 07-09. */
+
+  .home-mid{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px;}
+  /* The illustration is a transparent PNG, so there is no tile: it floats directly on the
+     screen background and over the decorative blurred circles. No fill, no radius, no
+     border needed — this is just a sizing box. `contain` so a non-square or off-centre
+     composition is never cropped to fit. Grew 196 -> 216 now that the art has no
+     background of its own competing with the screen. */
+  .home-art{
+    width:216px; height:216px; display:flex; align-items:center; justify-content:center;
+  }
+  .home-art img{width:100%; height:100%; object-fit:contain; display:block;}
+  .home-mid .big{font-size:23px; font-weight:800; text-align:center; line-height:1.25; max-width:200px; letter-spacing:-.01em;}
+
+  /* --- BUTTON LABEL: one line, always ---------------------------------------
+     The pill is 198px. With the icon (16px + 8px gap) and 20px padding each side,
+     the label gets 134px. Measured against SF Pro Rounded Bold:
+
+       "Find me something good"   168px @13.5 … 143px @11.5   NO FIT at any size
+       "Find me a good place"     145px @13.5 … 129px @12     fits at 12px
+       "Find me a place"          107px @13.5                 fits at full size
+
+     Sadri kept the icon, so the copy gave way instead — which is the rule this
+     folder already had written down: a label that won't fit at the 11.5px floor
+     means the copy is too long, not that the type should go smaller. "Find me a
+     good place" keeps "good", which is the actual promise (a value pick, not just
+     any nearby restaurant); "Find me a place" is the fallback if 12px ever reads
+     too small next to the other buttons, and it fits at the full 13.5px.
+
+     11.5px stays the hard floor. Below it a control label stops being comfortably
+     legible, and shrinking type is not a licence for long labels. */
+  .home-cta .btn-primary{width:100%; font-size:12px;}
+
+  /* Soft background circles are the shared .softbg in shared.css now. */
+</style>
+</head>
+<body>
+  <p class="screen-title">04 · Home — idle<span>Text stripped back to one question; the illustration carries the mood instead. Location chip stays as context, button owns the thumb zone. Art is a background-removed transparent PNG, so it sits on the screen rather than in a tile.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-home">
+      <div class="softbg"><span class="s1"></span><span class="s2"></span></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+
+        <div class="appbar">
+          <p class="bar-title">HungryNow</p>
+          <span class="state-chip">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>
+            </svg>
+            Seminyak, Bali
+          </span>
+        </div>
+
+        <div class="home-mid">
+          <div class="home-art"><img src="home-illustration.png" alt="Illustration of a traveler shrugging between two street-food carts, four dishes floating around them"></div>
+          <p class="big">Where should you eat tonight?</p>
+        </div>
+
+        <div class="home-cta">
+          <div class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+            Find me a good place
+          </div>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</body>
+</html>

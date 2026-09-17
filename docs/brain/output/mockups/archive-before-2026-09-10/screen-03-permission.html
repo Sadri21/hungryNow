@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — System location alert</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 03 only. Scoped to .screen-sysalert. The alert is deliberately drawn in the
+     system font, not SF Rounded — it is iOS chrome, not our design, and only the purpose
+     string inside it is ours to write. */
+  /* --- THE BACKDROP: the real screen 02, not a copy of it ---------------------
+     REBUILT 2026-09-07. What was here before was a hand-made drawing of the
+     PRE-SUPERGRAPHIC screen 02 — a 188px floating `welcome-banner.png` centred at
+     top:34px with the wordmark absolutely positioned at top:244px — plus a comment
+     saying "keep it in sync by hand". Screen 02 had since been rebuilt around a
+     full-bleed mosaic band, so this screen was showing a design that no longer existed.
+     The hand-sync instruction was the mechanism, and the mechanism was a comment.
+
+     The fix is to stop drawing screen 02 and start REUSING it. Everything below now
+     comes from shared.css: `.sg` (the band, moved there in the same pass), `.wordmark`,
+     `.tagline`, `.btn-primary`, and `--welcome-ground` for the tone. There is no geometry
+     here that screen 02 doesn't also use, so there is nothing left that can drift — the
+     only screen-02-specific numbers are the content padding-top and the CTA offset, and
+     both are commented against their source below.
+
+     WHAT THE ALERT ACTUALLY COVERS, measured rather than assumed: `.sysalert` is 214px
+     wide and about 265px tall, centred in the 242 x 532 screen, so it spans roughly
+     y=133 to y=398. Visible either side of it: the top two thirds of the band (0-133),
+     and the CTA plus its privacy note (432-502). Everything between is behind the alert.
+
+     So the wordmark (212-234) and the tagline (242-282) render nothing at this alert
+     height. They are kept anyway, and the `.purpose` card is not — the line is cost of
+     reproduction, not visibility. Wordmark and tagline are one shared class and one
+     identical string each, so they cannot drift and they keep this file a faithful
+     description of screen 02. The purpose card would mean re-deriving its asymmetric
+     corner radii and its -22px edge bleed here, i.e. real geometry maintained in two
+     places to draw zero visible pixels. That is the trade being made; it is not "hidden
+     things are omitted", which would have been the inconsistent version of this rule.
+     `.welcome-shapes`' corner arc is dropped on the same basis.
+
+     If the alert ever gets shorter — a two-option permission alert is — re-check what
+     becomes visible and bring the purpose card back if it does. */
+  .screen-sysalert .dimmed{position:absolute; inset:0; z-index:0;}
+  .screen-sysalert .dimmed-bg{position:absolute; inset:0; background:var(--welcome-ground);}
+  /* Mirrors `.screen-welcome .content` in screen-02-welcome.html: 22px inset from
+     `.content`, 184px top padding to clear the 200px band with 12px of breathing room. */
+  .screen-sysalert .dimmed-content{
+    position:absolute; inset:28px 0 0; padding:184px 22px 30px;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .screen-sysalert .dimmed-content .wordmark{margin-top:0;}
+  .screen-sysalert .dimmed-content .tagline{max-width:190px; margin-top:8px;}
+  .screen-sysalert .dimmed-content .cta-wrap{width:100%; margin-top:auto;}
+  .screen-sysalert .scrim{position:absolute; inset:0; background:rgba(20,10,8,.45); z-index:1;}
+  .screen-sysalert .statusbar, .screen-sysalert .home-indicator{z-index:4;}
+
+  .sysalert{
+    position:absolute; z-index:3; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:214px; border-radius:14px; overflow:hidden; text-align:center;
+    background:rgba(249,246,245,.94); backdrop-filter:blur(20px);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:#1c1c1e;
+  }
+  .sysalert .map{
+    height:74px; background:
+      linear-gradient(115deg, transparent 46%, rgba(255,255,255,.9) 46.5%, rgba(255,255,255,.9) 49%, transparent 49.5%),
+      linear-gradient(28deg, transparent 62%, rgba(255,255,255,.75) 62.5%, rgba(255,255,255,.75) 65%, transparent 65.5%),
+      #dfe6d9;
+    position:relative;
+  }
+  .sysalert .map .dot{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:13px; height:13px; border-radius:50%; background:#0a7cff; border:2px solid #fff;
+    box-shadow:0 0 0 9px rgba(10,124,255,.22);
+  }
+  .sysalert .body{padding:14px 14px 12px;}
+  .sysalert .title{font-size:12.5px; font-weight:600; line-height:1.3; margin:0 0 5px;}
+  .sysalert .msg{font-size:10.5px; line-height:1.4; color:#3a3a3c; margin:0;}
+  .sysalert .opts{border-top:.5px solid rgba(60,60,67,.29);}
+  .sysalert .opt{
+    padding:11px 8px; font-size:12.5px; color:#0a7cff; border-bottom:.5px solid rgba(60,60,67,.29);
+  }
+  .sysalert .opt:last-child{border-bottom:0;}
+  .sysalert .opt.bold{font-weight:600;}
+
+</style>
+</head>
+<body>
+  <p class="screen-title">03 · System location alert<span>Not our screen — iOS draws this. The only part we own is the purpose string, and it must be one active, specific sentence. Shown here so the copy is decided before it goes into Info.plist.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-sysalert">
+      <!-- Screen 02 itself, drawn from the shared band rule and the shared text classes —
+           not a picture of it. Purpose card omitted on purpose: the alert covers it. -->
+      <div class="dimmed" aria-hidden="true">
+        <div class="dimmed-bg"></div>
+        <div class="sg"><img src="welcome-supergraphic.png" alt=""></div>
+        <div class="dimmed-content">
+          <p class="wordmark">HungryNow</p>
+          <p class="tagline">New city? One tap, one honest answer.</p>
+          <div class="cta-wrap">
+            <div class="btn-primary">Continue</div>
+            <p class="privacy-note">iOS asks for permission next</p>
+          </div>
+        </div>
+      </div>
+      <div class="scrim"></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+
+      <div class="sysalert">
+        <div class="map"><span class="dot"></span></div>
+        <div class="body">
+          <p class="title">Allow “HungryNow” to use your location?</p>
+          <p class="msg">HungryNow uses your location to find restaurants within walking distance of where you are right now.</p>
+        </div>
+        <div class="opts">
+          <div class="opt">Allow Once</div>
+          <div class="opt bold">Allow While Using App</div>
+          <div class="opt">Don’t Allow</div>
+        </div>
+      </div>
+
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+  <p class="callout">Purpose string for <code>NSLocationWhenInUseUsageDescription</code> — copy verbatim. “Don’t Allow” lands on screen 07. The screen behind the alert is built from screen 02’s own shared band rule and text classes, so it can’t fall out of date the way the old hand-drawn copy did.</p>
+</body>
+</html>

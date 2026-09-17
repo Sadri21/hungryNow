@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>HungryNow app icon — foreground layer (fork-pin, rounded)</title>
+  <!--
+    TWO COMPONENTS, and the more robust of the set: one closed path that is a
+    fork and a map pin at once — three tines on top, body converging to a
+    pin's point. It carries NO counter, so unlike the three-component mark
+    there is no hole for the system's recolouring to show through in the
+    tinted and clear variants.
+    Icon Composer FOREGROUND layer; transparent ground by design.
+
+    ROUNDED PASS, 2026-09-09 — same treatment as the three-component mark:
+      notch bottoms  square floors -> full semicircular U (r 23)
+      pin tip        90deg point -> r 28 fillet
+      shoulder       tangent-continuous (control x = 672, was 680)
+    apple-hig.md's "crisp edges only" forbids blur and feathering, not
+    curvature; rounding is what visual-identity.md already asks for.
+
+    Geometry (locked):
+      Tines      x 352-428, 474-550, 596-672 (76 wide, 46 gaps); tops y 200,
+                 cap centres y 238 (r 38); notch U bottoms reach y 400
+      Shoulder   y 400 — the widest point, NO flare below it
+      Tip        fillet centre (512, 796), arc bottom y 824
+    Content bbox 320 x 624, centred on (512, 512).
+    Colour       #A6243D light / #F58396 dark. Shape never changes by variant.
+
+    29pt budget: the 46-unit tine gap = 1.30pt is the thinnest feature and it
+    IS the food signal. Do not narrow it, and do not add a fourth tine — four
+    forces the gaps to 40 units (1.13pt) and they close.
+  -->
+  <path fill="#A6243D" d="
+    M 352 400 L 352 238 A 38 38 0 0 1 428 238 L 428 377 A 23 23 0 0 0 474 377
+    L 474 238 A 38 38 0 0 1 550 238 L 550 377 A 23 23 0 0 0 596 377
+    L 596 238 A 38 38 0 0 1 672 238 L 672 400
+    C 672 540, 626 706, 532 816 A 28 28 0 0 1 492 816 C 398 706, 352 540, 352 400 Z"/>
+</svg>

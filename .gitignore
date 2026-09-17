@@ -1,0 +1,48 @@
+# Xcode
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+
+# Local Secrets (Kept out of Git per vault rule)
+Secrets.xcconfig
+Config/Secrets.xcconfig
+
+# OS
+.DS_Store
+
+# Python / Firebase Functions
+firebase/functions/venv/
+venv/
+__pycache__/
+*.py[cod]
+.firebase/
+firebase-debug.log
+*firebase-adminsdk*.json
+serviceAccountKey.json
+
+# Env
+.env
+.env.*
+
+# Local-only agent instructions (never ship — contains private vault paths)
+CLAUDE.local.md
+AGENTS.local.md
+.claude/settings.local.json

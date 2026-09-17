@@ -1,0 +1,490 @@
+/* HungryNow — shared mockup styles
+   Single source of truth for all screen files in this folder.
+   Design tokens come straight from wiki/concepts/visual-identity.md
+   (Pomegranate & Pistachio, light appearance).
+   Edit a token here and every screen file updates at once. */
+
+:root{
+    --bg:#F7F1EF; --elevated:#F0E2DE; --text:#2B1512; --text2:#6B564F;
+    --hero-surface:#A6243D; --hero-text:#8A1E33; --hero-fill:rgba(166,36,61,.10);
+    --spec-surface:#8FA876; --spec-text:#4F6A38; --spec-fill:rgba(143,168,118,.16);
+    --hairline:#E7D9D4;
+
+    /* ON-ACCENT FOREGROUND (added 2026-09-07). The colour of text and glyphs that sit
+       ON a saturated accent fill — the primary button's label, the radar's centre glyph.
+       It was the literal #FBF3EC in five places before this; it is a real token because
+       in dark appearance it does NOT simply invert (the accent fill stays saturated, so
+       its foreground stays near-white while --text goes light). Anything drawn on
+       --hero-surface or --spec-surface uses this, never --bg and never a literal. */
+    --on-hero:#FBF3EC;
+
+    /* THE WELCOME GROUND (added 2026-09-07) — one token, three screens.
+       Screen 02's ground tone is load-bearing for two other screens: screen 01 (launch)
+       must match it or the launch->welcome transition shows a tone jump, which is exactly
+       what `apple-hig-patterns.md` -> Launching exists to prevent, and screen 03 draws
+       screen 02 behind the system alert.
+       That relationship used to be three hardcoded `var(--elevated)`s plus a comment in
+       screen 01 saying "if 02's ground ever changes, change it here in the same commit".
+       The comment was written on 2026-09-07 and was already the second attempt at keeping
+       it true by hand. This token is the version that cannot rot: change the ground once
+       here and all three screens follow. Do NOT go back to naming --elevated directly on
+       any of the three. */
+    --welcome-ground:var(--elevated);
+
+    /* RGB TRIPLET of --hero-surface, for the rgba() stops in screen 05's conic gradient.
+       CSS can't decompose a hex into channels, so a gradient that needs per-stop alpha
+       has to carry the channels separately. Lived inside screen-05-loading.html until
+       2026-09-07, which meant a palette swap had to know to edit a file it had no reason
+       to open. Keep in sync with --hero-surface — the one place a hand-sync rule survives
+       here, because the language gives no way to derive it. */
+    --hero-rgb:166,36,61;
+
+    /* --raised was added and then REMOVED on 2026-09-07, same day. It was a pure-white
+       surface one step above --elevated, introduced for screen 02's purpose card.
+       Rejected on sight at real size: pure white against this deliberately warm palette
+       reads as a bright sticker pasted onto the screen, not as part of it. Sadri caught
+       it; I had talked myself into it from a contrast measurement alone, which is exactly
+       the wrong basis for a temperature judgement.
+       The card uses --bg with a --hairline border instead. Not re-added without a reason
+       that survives being looked at, not just measured. */
+
+    /* SUPERGRAPHIC TINTS (screen 02 only, added 2026-09-07).
+       Stronger decorative tints of the SAME two accent hues — no new hue enters the system.
+       They exist because --hero-fill (.10) and --spec-fill (.16) are tuned to sit invisibly
+       behind content; a mosaic built from them would be a grey rectangle.
+
+       These do NOT break the accent-reservation rule in visual-identity.md. That rule is
+       about the *saturated* accent identifying hero vs specialty content — and screen 02
+       contains no recommendation of either kind, so there is nothing to confuse them with.
+       The saturated --hero-surface / --spec-surface stay reserved as before.
+
+       Alpha over --bg, so they composite correctly in dark mode without separate values.
+       A palette swap to Rust & Mustard edits these four alongside the two --*-fill tokens. */
+    --sg-hero-1:rgba(166,36,61,.14); --sg-hero-2:rgba(166,36,61,.28);
+    --sg-spec-1:rgba(143,168,118,.22); --sg-spec-2:rgba(143,168,118,.42);
+  }
+  /* --- GLYPH COLOUR: currentColor, never a literal (rule added 2026-09-07) ----------
+     Every inline SVG in this folder takes its colour from CSS, not from a hex baked into
+     the markup: `stroke="currentColor"` / `fill="currentColor"`, with the colour set on
+     the glyph's CONTAINER here in this file. A two-tone mark that can't use one inherited
+     colour uses `var(--token)` in the markup instead — still a token, never a literal.
+
+     Why this is a rule and not a preference: before this pass, eight files carried
+     hardcoded #8A1E33 / #4F6A38 / #FBF3EC / #F7F1EF inside SVG attributes. Those cannot
+     respond to a token change, so the dark-appearance pass — and any palette swap to
+     Rust & Mustard — was a markup edit across eight files rather than an edit to :root.
+     `.state-chip` was the only glyph doing it correctly and is what the rest now follow.
+
+     The ONE deliberate exception is screen 03's `.sysalert`, which draws iOS's own alert
+     chrome (#0a7cff and friends). Those are Apple's system colours, not ours, and must
+     NOT follow our palette — if they moved with a palette swap the mockup would stop
+     being an honest picture of what iOS puts on screen. */
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#15100c; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+    padding:40px 20px;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .screen-title{color:#F5EFE4; font-size:14px; font-weight:800; letter-spacing:.02em; text-align:center;}
+  .screen-title span{display:block; color:#8C8175; font-size:11px; font-weight:600; margin-top:5px; max-width:280px; line-height:1.5;}
+  /* Caption BELOW the phone frame — for notes about the screen that must not be
+     mistaken for UI. Anything meta belongs here or in .screen-title, never inside .screen. */
+  .callout{max-width:280px; color:#8C8175; font-size:10.5px; line-height:1.6; text-align:center; margin:0;}
+  .callout code{color:#C7A98F; font-family:ui-monospace,Menlo,monospace;}
+
+
+  /* PHONE FRAME */
+  .device{
+    width:270px; height:560px; border-radius:44px; background:#0d0908;
+    padding:14px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+    position:relative;
+  }
+  .screen{
+    width:100%; height:100%; border-radius:32px; overflow:hidden; position:relative;
+    background:var(--bg); color:var(--text); display:flex; flex-direction:column;
+  }
+  .island{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:84px; height:22px; background:#0d0908; border-radius:14px; z-index:5;
+  }
+  .statusbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px 0; font-size:12px; font-weight:700; color:var(--text);
+    position:relative; z-index:2;
+  }
+  .statusbar .icons{display:flex; gap:4px; align-items:center;}
+  .home-indicator{
+    position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+    width:110px; height:4px; border-radius:3px; background:var(--text); opacity:.35; z-index:2;
+  }
+
+  .content{flex:1; display:flex; flex-direction:column; padding:0 22px;}
+
+  /* Shared bits */
+  .mark{
+    width:56px; height:56px; border-radius:16px; background:var(--hero-fill);
+    display:flex; align-items:center; justify-content:center; margin:0 auto;
+  }
+  .mark svg{display:block;}
+  .wordmark{font-size:18px; font-weight:800; text-align:center; margin:16px 0 0; letter-spacing:-.01em;}
+  .tagline{font-size:12.5px; color:var(--text2); text-align:center; line-height:1.6; margin:10px auto 0; max-width:210px;}
+
+  /* Buttons never wrap — a two-line pill reads as a broken control. Default size is
+     13.5px; a button whose label doesn't fit at that size drops to a smaller one on
+     its own screen (screen 04 is the only one so far), with 11.5px as the floor.
+     Below that a control label stops being comfortably legible, so if a label doesn't
+     fit at 11.5px the COPY is too long — shrinking type is not a licence for it.
+
+     CSS can't measure text and auto-fit, so those sizes are worked out per label
+     rather than pretending a `clamp()` does it. In SwiftUI this becomes real adaptive
+     behaviour: `.lineLimit(1).minimumScaleFactor(0.85)`. The measured sizes here are
+     what that will settle on, so they are worth keeping as the reference. */
+  .btn-primary{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--hero-surface); color:var(--on-hero); font-size:13.5px; font-weight:700;
+    white-space:nowrap;
+    padding:15px 20px; border-radius:100px; width:100%;
+    box-shadow: 0 8px 16px -6px rgba(166,36,61,.45), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .btn-primary svg{flex:0 0 auto;}
+  .btn-ghost{white-space:nowrap;}
+  .btn-ghost{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    color:var(--text2); font-size:12.5px; font-weight:700; padding:10px; width:100%;
+  }
+
+  /* Screen 1 — Launch */
+  /* Screen 01 (Launch) styles now live inside screen-01-launch.html — edit there.
+     Moved out 2026-09-07 when its ground had to follow screen 02's. */
+
+  /* Screen 2 — Welcome */
+  /* Screen 02 (Welcome + location purpose) styles now live inside screen-02-welcome.html — edit there. */
+
+  /* Screen 3 — System location alert */
+  /* Screen 03 styles now live inside screen-03-permission.html — edit there. */
+
+  /* opacity:.75 removed 2026-09-07 — an accessibility bug, not a style choice.
+     --text2 at 75% composites to 3.51:1 on --bg and 3.26:1 on --elevated; this is 10px
+     text, which needs 4.5:1. It was failing on every screen that used it. At full opacity
+     it sits at 6.12:1 / 5.42:1. If it reads too heavy, use a smaller size or a lighter
+     token with a *measured* ratio — never opacity, which silently breaks contrast. */
+  .privacy-note{font-size:10px; color:var(--text2); text-align:center; margin-top:10px;}
+
+  /* Screen 4 — Home */
+  /* Screen 04 (Home) styles now live inside screen-04-home.html — edit there. */
+
+  /* Screen 5 — Loading */
+  /* Screen 05 styles now live inside screen-05-loading.html — edit there.
+     The old bounce+glow orb, .loading-label and .loading-btn were removed in the
+     2026-09-07 design pass; nothing references them any more. That pass also fixed the
+     dangling .home-top / .home-cta references screen 05 had inherited from the split. */
+
+  /* Screen 6 — Result */
+  /* The bar is fixed at the top; only what is under it scrolls, which is what makes
+     the `.appbar.scrolled` hairline meaningful on this screen. */
+  .screen-result .content{padding-top:10px; padding-bottom:0; overflow:hidden;}
+  .screen-result .result-scroll{flex:1; overflow-y:auto; padding-top:16px;}
+  /* .section-label (uppercase pomegranate "HERO PICK") removed 2026-09-07 — screen 06
+     replaced it with a sentence in the app's voice, and nothing else used it. */
+  .hero-card{background:var(--elevated); border-radius:16px; padding:18px 18px 20px; margin-bottom:22px;}
+  .hero-name{font-weight:800; font-size:17px; margin:0 0 8px; line-height:1.25;}
+  .hero-reason{font-size:11.5px; line-height:1.6; color:var(--text2); margin:0 0 14px;}
+  /* Screen 06's instance of the shared `.fact-row`. No flex-wrap: three value+label
+     columns at 198px fit on one line, and a wrapped column would break the row's
+     read-as-one-object quality. If a fourth fact ever lands ("open now"), the row is
+     re-measured rather than allowed to wrap. */
+  .hero-meta{display:flex;}
+  .spec-label{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); font-weight:800; margin:0 0 10px;}
+  .result-footer{margin-top:auto; padding-bottom:20px;}
+
+  /* --- THE FACT ROW: one component, every screen that states a fact ----------
+     Rendering chosen by Sadri 2026-09-08 from `variants-fact-row.html` (variant C,
+     value-over-label). The component itself is unchanged from the version below it —
+     same fields, same fixed order, same reuse on 06 and 08. Only the drawing changed.
+
+     WHY IT IS NO LONGER A PILL. Sadri: "I still don't like chip mode. Is chip like AI
+     always using it when create UI/UX, I'm already bored see the chip style." He is
+     right, and the adopt item was never about pills — reference 008's discipline is ONE
+     treatment reused in the SAME position, which is a rule about consistency, not about
+     rounded rectangles. I had conflated "component" with "chip" and replaced three bare
+     text spans with three outlined containers, which was more decoration than what was
+     there before. The outlined pill is the shape that appears when nobody decides
+     anything; see the standing constraint now recorded in visual-identity.md.
+
+     What removing the containers bought, beyond taste: the hero card and the specialty
+     rows had started reading as the SAME KIND OF OBJECT, because both were outlined
+     pills sitting on hairlines. With the pills gone the hero card is the only filled
+     surface on the screen, so the hero/specialty distinction is carried by surface and
+     scale — which is `elevation-as-selection` (adopt item 5) actually working, rather
+     than colour doing it alone.
+
+     Height is unchanged: a 13px value at line-height 1.1 plus an 8.5px label is ~25px,
+     the same as a 10.5px pill with 5px padding and a 1.2px border. This was not a
+     trade of space for style.
+
+     COLOUR: the accent lives on the VALUE only. The label is always --text2, because it
+     is a caption naming the field, not part of the fact — so `.calm` needs no label
+     variant and the accent reservation stays on the number where it means something. */
+  .fact-row{display:flex; gap:20px;}
+  .fact{display:flex; flex-direction:column; gap:1px;}
+  .fact-value{
+    font-size:13px; font-weight:800; line-height:1.1; margin:0;
+    color:var(--hero-text); white-space:nowrap;
+  }
+  .fact-label{
+    font-size:8.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--text2); margin:0;
+  }
+  .fact-row.calm .fact-value{color:var(--spec-text);}
+
+  /* --- SUPERSEDED 2026-09-08: the pill rendering ------------------------------
+     Kept for one reason only — `variants-fact-row.html` still renders it as the
+     "current" column so the rejected option can be seen next to the chosen one. Delete
+     both together once that decision aid is deleted. Nothing in screens 01-09 uses it.
+
+     Original note, for the record:
+     THE FACT CHIP: one component, every screen that states a fact
+     `metric-chip-row` from reference 008, adopt item 1 in reference-adoption.md and
+     called the highest-value adoption in the set. 008's discipline is that duration ·
+     distance · group size are ONE chip component in identical treatment and identical
+     position on all three of its screens — not decoration re-invented per screen.
+
+     Replaces two things that were the same idea drawn twice:
+       - screen 06's `.hero-meta`, which was three bare coloured text spans
+       - screen 08's `.radius-note`, a one-off pill with its own border and fill rules
+     Both now use this. Anything that states a fact uses this and nothing else.
+
+     FIXED FIELD ORDER on the hero row: distance, then price, then rating. Distance and
+     price are the two facts people actually decide on, and app-mockups.md already found
+     from the other direction that a long model-generated `reason` pushed exactly those
+     two off the first screen. Order is part of the component, not per-screen taste.
+
+     Flat fill + hairline border, no gradient, no shadow — compatible with
+     visual-identity.md as written. Colour carries meaning: `.hero` for the one pick,
+     `.calm` (pistachio) for specialty and for neutral status facts like the search
+     radius, matching the accent reservation everywhere else in the app. */
+  .fact-chip{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:10.5px; font-weight:700; white-space:nowrap;
+    padding:5px 10px; border-radius:100px;
+    border:1.2px solid var(--hairline); color:var(--text2);
+  }
+  .fact-chip svg{flex:0 0 auto;}
+  .fact-chip.hero{border-color:var(--hero-surface); color:var(--hero-text); background:var(--hero-fill);}
+  .fact-chip.calm{border-color:var(--spec-text); color:var(--spec-text); background:var(--spec-fill);}
+
+  /* --- THE SPECIALTY LIST -----------------------------------------------------
+     A LIST, not a horizontal card row. Two reasons, and the second one overrides an
+     item on our own adopt list, so both are recorded here rather than in a commit note.
+
+     1. `apple-hig-components.md` -> Layout and organization: collections are for
+        image-heavy content in a grid or row, and a LIST is the default for mostly-text
+        content. `SpecialtyPick` has no photo field at all (api-contract.md: `photoRef`
+        is hero-only), so these rows are text by contract. A collection would be the
+        wrong component for what the API can actually supply.
+
+     2. `clipped-scroll-hint` (adopt item 6, the most-corroborated technique in the
+        reference set at 5/8) is REJECTED for this screen. `specialties` is schema-
+        enforced at 2-3 items, always — never 0, 1, or 4+. A horizontal scroller for at
+        most three cards either fits entirely, in which case a card clipped at the edge
+        is a lie about scrollability, or has to be artificially cramped to manufacture
+        the clip. The technique was adopted for being HONEST; used here it becomes
+        decorative encoding, which is the exact grounds reference-adoption.md rejects
+        `radial-layout` and `route-over-photo` on. Keep it adopted for any future screen
+        with a genuinely unbounded row.
+
+     `origin-tag` (adopt item 3) IS applied, and it was the real fix anyway: the named
+     thing is primary and the category is a small consistent tag attached to it. The old
+     `.spec-chip` row rendered `foodCategory` ONLY — three bare cuisine names — while the
+     API was already returning `name`, `address`, `reason` and `description` for every
+     specialty, all guaranteed non-null. The chips weren't just unactionable, they were
+     discarding four fields that already existed.
+
+     Tag sits BELOW the name, not trailing it: real names are long ("Restoran Nasi Kandar
+     Ar Rashid" is typical) and a trailing tag competes with the name for the same 198px.
+
+     NO CHEVRON, deliberately. A disclosure indicator promises navigation into a detail
+     view, and there is nowhere to go — Directions is blocked on the coordinates gap and
+     this app has no detail screen by design. `apple-hig-components.md` -> Lists is
+     explicit that the chevron means navigation, so drawing one here would be a promise
+     the app can't keep. These rows are informational until there's something to open.
+
+     Depth from the hairline and the existing surface tokens only, never a new accent —
+     `value-hierarchy`, adopt item 4. */
+  .spec-list{list-style:none; margin:0 0 20px; padding:0;}
+  .spec-item{
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+    padding:11px 0; border-bottom:1px solid var(--hairline);
+  }
+  .spec-item:first-child{border-top:1px solid var(--hairline);}
+  .spec-name{
+    font-size:12.5px; font-weight:800; line-height:1.3; color:var(--text); margin:0;
+  }
+
+  /* The category, as glyph + text with no container — variant S-C, chosen by Sadri
+     2026-09-08. This is where the `foodCategory` icon plan (already on the checklist)
+     finally earns its keep: it REPLACES the pill rather than decorating one, so the
+     icon budget was going to be spent anyway and now it buys the container's removal.
+
+     The glyph also carries the category non-verbally, which is what `apple-hig.md` ->
+     Color asks for — never colour as the only signal. The old pill leaned on pistachio
+     alone to mean "specialty"; a rice bowl, a skewer and a cup are three different
+     shapes, so the distinction survives colour blindness and greyscale.
+
+     GLYPHS COME FROM ONE SET. These are the same drawings as screen 05's radar pins,
+     deliberately — same stroke weight, same 24-unit grid, same rounded caps. When the
+     bundled `foodCategory` icon library is built for real, screen 05's pins and this
+     list must draw from it, not from two hand-made sets that drift apart.
+     `apple-hig.md` -> Icons: consistent size/weight/stroke across every icon in the app.
+
+     Row height is ~14px SHORTER than the pill version (name + a 13px glyph line, versus
+     name + a 25px pill), so screen 06 gains about 42px across three rows. */
+  .spec-cat{
+    display:flex; align-items:center; gap:5px; margin:4px 0 0;
+    font-size:10px; font-weight:700; color:var(--spec-text);
+  }
+  .spec-cat svg{flex:0 0 auto;}
+
+  /* --- FULL-BLEED SEPARATORS -----------------------------------------------
+     Both of screen 06's rules — under the app bar and above "Find something else" —
+     run edge to edge, while the text they separate stays on the 22px content inset.
+     `.content` is padded 22px, so a plain border stops 22px short of each edge and
+     reads as an underline belonging to the text rather than as a boundary between
+     two surfaces. Negative margins push the rule out to the screen edge and the
+     matching padding puts the content back where it was.
+
+     Hairlines, not shadows or filled bars: iOS separates surfaces with a hairline
+     and material (see [[appbar-ui-design]] conflict #3), and visual-identity.md bans
+     drop shadows on cards, which is the same instinct applied to chrome. */
+  .appbar.scrolled, .screen-result .result-footer{
+    margin-left:-22px; margin-right:-22px;
+    padding-left:22px; padding-right:22px;
+  }
+
+
+/* --- Edge-case states (screens 07, 08, 09) ---
+   Genuinely shared: all three are the same shape — Home's header, a centered
+   icon + headline + explanation, and an action in the thumb zone. Only the icon,
+   copy and action differ, so they live here rather than being copied three times.
+   HIG (Patterns → Feedback): these are inline states, not alerts — an interruptive
+   alert is reserved for something critical, and none of these are.
+   HIG (Foundations → Writing): say what is wrong and what to do about it. No "we",
+   no "oops", no blame. An empty state always offers a next action. */
+.screen-state .content{justify-content:space-between; padding-top:10px; padding-bottom:34px; position:relative; z-index:1;}
+
+/* --- THE APP BAR ---------------------------------------------------------
+   One bar for every in-app screen (04, 05, 06 and the edge states 07-09), so the
+   top of the app never shifts as you move through it. Replaced three near-identical
+   headers on 2026-09-07: `.home-header` (04), `.state-header` (05, 07-09) and
+   `.result-top` (06, a centred wordmark).
+
+   Slots are left / centre / right, per [[appbar-ui-design]]; partial bars are normal,
+   and this app uses left + right only. The centre stays empty on purpose — it's the
+   overflow slot if a screen ever needs a segmented control or search.
+
+   LEFT is the title, and it says where you are, not who made the app:
+     04 / 07 / 08 / 09  "HungryNow"  (root screen and its states — brand as context)
+     05                 "Searching"
+     06                 NO LONGER USES THIS BAR (2026-09-08). Its title and chip moved into
+                        the result sheet as an eyebrow row, so the hero photo can reach the
+                        top of the screen without text sitting over it. A deliberate,
+                        recorded exception: 06 is the destination screen, and shedding
+                        chrome on arrival at a detail view is the platform convention. The
+                        unification below still governs 04, 05 and 07-09.
+   Deliberately NOT a centred logo on every screen: [[apple-hig]] → Branding says keep
+   branding secondary and don't spend screen space on a logo unless it gives context.
+   That's also the first of five places [[appbar-ui-design]] and the HIG disagree.
+
+   RIGHT is the location chip. It's status, not a control — the answer only makes
+   sense relative to where you are, so it stays visible on every screen that has or
+   needs a location.
+
+   Height is a fixed 44px on every screen so nothing below it jumps between screens.
+   FLAT by default (bar and background are one surface). `.appbar.scrolled` adds a
+   hairline for content scrolled underneath — a hairline, not the drop shadow that
+   [[appbar-ui-design]] suggests, because iOS separates with a hairline and material
+   instead. NOTE: screen 06 was the only screen that scrolled and it no longer draws this
+   bar, so `.scrolled` currently has no consumer. Kept deliberately — the next scrolling
+   screen needs it, and re-deriving the hairline-not-shadow reasoning would be wasteful. */
+.appbar{
+  display:flex; align-items:center; justify-content:space-between;
+  height:44px; flex:0 0 auto; gap:8px;
+}
+.appbar .bar-title{
+  font-size:13px; font-weight:800; letter-spacing:.02em; color:var(--text);
+  margin:0; white-space:nowrap; flex:0 0 auto;
+}
+.appbar.scrolled{border-bottom:1px solid var(--hairline);}
+
+/* Long place names are the realistic failure here — "Kuta Selatan, Badung Regency"
+   is a normal Places result. The chip truncates, never the title, and it never pushes
+   the title off the bar: capped at half the bar's width with an ellipsis. */
+.state-chip{
+  display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700;
+  padding:5px 10px; border-radius:100px; border:1px solid var(--hairline); color:var(--text2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex:0 1 auto; max-width:50%; min-width:0;
+}
+.state-chip svg{flex:0 0 auto;}
+.state-chip.off{border-color:var(--hero-surface); color:var(--hero-text); background:var(--hero-fill);}
+
+.state-mid{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center;}
+/* The icon's colour is set HERE, on the container, and the glyph inside uses
+   currentColor — so the `.calm` variant switches fill AND stroke in one class instead of
+   needing a different hex in the markup of every screen that uses it. */
+.state-icon{
+  width:66px; height:66px; border-radius:50%; background:var(--hero-fill);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--hero-text);
+}
+.state-icon.calm{background:var(--spec-fill); color:var(--spec-text);}
+.state-headline{font-size:19px; font-weight:800; line-height:1.3; margin:0; max-width:200px; letter-spacing:-.01em;}
+.state-body{font-size:12px; line-height:1.6; color:var(--text2); margin:0; max-width:206px;}
+.state-cta{display:flex; flex-direction:column; gap:2px;}
+
+/* --- THE SUPERGRAPHIC BAND (screens 02 and 03) ----------------------------
+   Moved out of screen-02-welcome.html on 2026-09-07, when screen 03 was rebuilt to draw
+   the real screen 02 behind the system alert instead of a stale hand-made copy of it.
+
+   That is the whole reason this lives here: screen 03's job is to show what is actually
+   underneath the alert, so its backdrop must BE screen 02's composition, not a second
+   drawing of it. Before this, screen 03 was still rendering the pre-supergraphic layout
+   (a 188px floating `welcome-banner.png` with the wordmark at top:244px) — the design it
+   replaced. Its own CSS carried the instruction "keep it in sync by hand", and it wasn't.
+
+   So the coupling between the two screens is now exactly two things, both unforgeable:
+   this rule, and the `welcome-supergraphic.png` asset. Neither can drift, because there
+   is only one of each.
+
+   Geometry unchanged from the original: 272 x 200 at left:-15px, so it overhangs the
+   242px screen by 15px on both sides and gets cropped there. The asset is authored at
+   1.36:1 (272:200) so object-fit:cover never re-crops it. Row-1-pale still holds
+   (0.000% ink in the top 20%) because the status bar sits on it — any replacement asset
+   MUST be re-measured for that before it goes in. */
+.sg{
+  position:absolute; top:0; left:-15px; width:272px; height:200px;
+  z-index:0; overflow:hidden;
+}
+.sg img{width:100%; height:100%; object-fit:cover; display:block;}
+
+/* --- SOFT BACKGROUND ------------------------------------------------------
+   The two blurred accent circles that sit behind every in-app screen. Shared for
+   the same reason the app bar is: they are what stops these screens reading as
+   plain white, and having them on some screens but not others made the flow feel
+   like two different apps.
+
+   Added to 05 and 06 on 2026-09-07 — they never had them (05 and 06 predate the
+   pattern, which arrived with screen 04), which is exactly the drift the app-bar
+   pass was meant to catch and didn't. Replaces `.home-shapes` (04) and
+   `.state-shapes` (07-09), which were the same rules under two names.
+
+   Sits as a sibling of `.content` inside `.screen`, absolutely positioned — so on
+   screen 06 it stays put while the content scrolls over it, rather than scrolling
+   away. Positions dodge the middle of the screen deliberately: screen 05's radar
+   and screen 04's illustration both live there.
+   Screen 02 keeps its own `.welcome-bg` (four circles, tuned to the illustration). */
+.softbg{position:absolute; inset:0; overflow:hidden; z-index:0;}
+.softbg span{position:absolute; border-radius:50%; filter:blur(3px);}
+.softbg .s1{width:180px; height:180px; background:var(--hero-fill); top:-64px; right:-70px;}
+.softbg .s2{width:130px; height:130px; background:var(--spec-fill); bottom:120px; left:-62px;}

@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HungryNow — App Icon</title>
+<style>
+  /* ------------------------------------------------------------------
+     Self-contained by design: no external CSS, no external fonts, no
+     image files. Every mark on this page is one inline <symbol> reused
+     via <use>, so no two tiles can drift apart.
+     ------------------------------------------------------------------ */
+
+  /* Pomegranate & Pistachio — light */
+  :root{
+    --ink:#2B1512;          /* TextPrimary (Aubergine) */
+    --ink-2:#6B564F;        /* TextSecondary */
+    --blush:#F7F1EF;        /* Background */
+    --elevated:#F0E2DE;
+    --hairline:#E7D9D4;
+    --hero:#A6243D;         /* HeroAccentSurface — graphical use */
+    --hero-deep:#8A1E33;    /* HeroAccentText */
+    --d-ground:#241016;     /* Background (Wine-black) */
+    --d-hero:#F58396;       /* HeroAccentSurface/Text, bright */
+    --d-ink:#F5E7E2;
+    --squircle:22.4%;       /* iOS superellipse approximation */
+  }
+
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--blush); color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:56px 28px 96px;
+  }
+  .wrap{ max-width:1000px; margin:0 auto; }
+
+  h1{ font-size:34px; line-height:1.15; letter-spacing:-.02em; margin:0 0 8px; font-weight:700; }
+  .sub{ color:var(--ink-2); margin:0 0 10px; max-width:64ch; }
+  .meta{ color:var(--ink-2); font-size:13px; margin:0; }
+  h2{
+    font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--ink-2); font-weight:600;
+    margin:64px 0 20px; padding-bottom:10px; border-bottom:1px solid var(--hairline);
+  }
+  h3{ font-size:17px; margin:0 0 4px; font-weight:600; }
+  p{ margin:0 0 12px; }
+
+  /* ---- tiles ---- */
+  .tile{ border-radius:var(--squircle); display:grid; place-items:center; overflow:hidden; flex:0 0 auto; }
+  .tile svg{ width:100%; height:100%; display:block; }
+  .mark{ color:var(--hero); }
+  .t-light{ background:var(--blush); }
+  .t-light .mark{ color:var(--hero); }
+  .t-dark{ background:var(--d-ground); }
+  .t-dark .mark{ color:var(--d-hero); }
+  .t-tint-d{ background:#3A3A3C; } .t-tint-d .mark{ color:#EDEDED; }
+  .t-tint-l{ background:#E7E4E1; } .t-tint-l .mark{ color:#3A3A3C; }
+  .t-clear{ background:#8E8177; }  .t-clear .mark{ color:rgba(255,255,255,.86); }
+  .ring{ box-shadow:inset 0 0 0 1px var(--hairline); }
+
+  /* ---- candidate row ---- */
+  .compare{ display:flex; flex-wrap:wrap; gap:40px; }
+  .card{ flex:1 1 280px; min-width:260px; }
+  .card .tile{ width:200px; height:200px; margin-bottom:18px; }
+  .badge{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; padding:4px 9px; border-radius:5px; margin-bottom:10px;
+  }
+  .b-yes{ background:var(--hero); color:#fff; }
+  .b-alt{ background:var(--elevated); color:var(--ink-2); box-shadow:inset 0 0 0 1px var(--hairline); }
+  .b-out{ background:transparent; color:var(--ink-2); box-shadow:inset 0 0 0 1px var(--hairline); }
+  .card p{ color:var(--ink-2); font-size:14.5px; max-width:38ch; }
+
+  /* ---- ladders / rows ---- */
+  .ladder{ display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap; }
+  .rung{ text-align:center; }
+  .rung .cap{ display:block; font-size:11px; color:var(--ink-2); margin-top:10px; font-variant-numeric:tabular-nums; }
+  .s180{width:180px;height:180px} .s120{width:120px;height:120px} .s83{width:83px;height:83px}
+  .s60{width:60px;height:60px}    .s40{width:40px;height:40px}    .s29{width:29px;height:29px}
+  .appearances{ display:flex; gap:24px; flex-wrap:wrap; }
+  .appearances .tile{ width:132px; height:132px; }
+
+  /* ---- rejected ---- */
+  .rejects{ display:flex; gap:28px; flex-wrap:wrap; }
+  .rej{ flex:1 1 200px; min-width:190px; }
+  .rej .tile{ width:104px; height:104px; margin-bottom:12px; opacity:.72; }
+  .rej h3{ font-size:14.5px; margin-bottom:3px; }
+  .rej p{ font-size:13.5px; color:var(--ink-2); margin:0; max-width:30ch; }
+
+  /* ---- home screen ---- */
+  .screens{ display:flex; gap:34px; flex-wrap:wrap; }
+  .phone{ width:290px; border-radius:40px; padding:16px 14px 22px; box-shadow:inset 0 0 0 1px var(--hairline); }
+  .phone.light{ background:var(--elevated); }
+  .phone.dark{ background:#1A0B10; box-shadow:inset 0 0 0 1px #3A1E27; color:var(--d-ink); }
+  .statusbar{ display:flex; justify-content:space-between; font-size:11px; font-weight:600;
+              padding:4px 10px 16px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .phone.dark .statusbar{ color:var(--d-ink); }
+  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px 14px; }
+  .app{ text-align:center; }
+  .app .tile{ width:100%; aspect-ratio:1; }
+  .app .lbl{ display:block; font-size:9.5px; margin-top:5px; color:var(--ink); }
+  .phone.dark .app .lbl{ color:var(--d-ink); }
+  .n1{background:#C9BDB6} .n2{background:#B6C0A9} .n3{background:#CBB9A2} .n4{background:#AEB6BF}
+  .n5{background:#C4AEB4} .n6{background:#BDB4A6} .n7{background:#B0AEBB}
+  .phone.dark .n1{background:#4A403C} .phone.dark .n2{background:#414737}
+  .phone.dark .n3{background:#4C4033} .phone.dark .n4{background:#3A4149}
+  .phone.dark .n5{background:#463840} .phone.dark .n6{background:#443F35}
+  .phone.dark .n7{background:#3D3B45}
+
+  /* ---- notes ---- */
+  .notes{ display:flex; gap:40px; flex-wrap:wrap; }
+  .col{ flex:1 1 320px; min-width:290px; }
+  ul{ margin:0 0 18px; padding-left:20px; }
+  li{ margin-bottom:9px; color:var(--ink-2); font-size:14.5px; }
+  li strong{ color:var(--ink); font-weight:600; }
+  code{ font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+        background:var(--elevated); padding:1px 5px; border-radius:4px; color:var(--ink); }
+  .open{ color:var(--hero-deep); font-weight:600; }
+  .tablewrap{ overflow-x:auto; }
+  table{ border-collapse:collapse; width:100%; min-width:520px; font-size:14px; }
+  th,td{ text-align:left; padding:9px 14px 9px 0; border-bottom:1px solid var(--hairline); vertical-align:top; }
+  th{ font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2); font-weight:600; }
+  td code{ white-space:nowrap; }
+  .sw{ display:inline-block; width:13px; height:13px; border-radius:3px; vertical-align:-2px;
+       margin-right:7px; box-shadow:inset 0 0 0 1px rgba(43,21,18,.16); }
+  .callout{
+    border-left:3px solid var(--hero); background:var(--elevated);
+    padding:16px 20px; margin:0 0 28px; border-radius:0 8px 8px 0; max-width:70ch;
+  }
+  .callout p:last-child{ margin-bottom:0; }
+  footer{ margin-top:72px; padding-top:22px; border-top:1px solid var(--hairline); color:var(--ink-2); font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- ================= vector source, defined once ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+
+  <!-- Three components: tines (food) + clock counter (time) + pin taper (place).
+       Outline is ONE continuous subpath so evenodd punches only the holes
+       intended; the hands are ONE connected L so they don't cancel at the centre. -->
+  <symbol id="trio" viewBox="0 0 1024 1024">
+    <path fill="currentColor" fill-rule="evenodd" d="
+      M 322 374 L 322 258 A 46 46 0 0 1 414 258 L 414 348 A 26 26 0 0 0 466 348
+      L 466 258 A 46 46 0 0 1 558 258 L 558 348 A 26 26 0 0 0 610 348
+      L 610 258 A 46 46 0 0 1 702 258 L 702 374
+      C 702 514, 648 690, 536 802 A 34 34 0 0 1 488 802 C 376 690, 322 514, 322 374 Z
+      M 640 530 A 128 128 0 1 0 384 530 A 128 128 0 1 0 640 530 Z
+      M 491 463 A 21 21 0 0 1 533 463 L 533 497 A 12 12 0 0 0 545 509
+      L 573 509 A 21 21 0 0 1 573 551 L 512 551 A 21 21 0 0 1 491 530 Z"/>
+  </symbol>
+
+  <!-- Fork + pin as one silhouette (two components). -->
+  <symbol id="forkpin" viewBox="0 0 1024 1024">
+    <path fill="currentColor" d="
+      M 352 400 L 352 238 A 38 38 0 0 1 428 238 L 428 377 A 23 23 0 0 0 474 377
+      L 474 238 A 38 38 0 0 1 550 238 L 550 377 A 23 23 0 0 0 596 377
+      L 596 238 A 38 38 0 0 1 672 238 L 672 400
+      C 672 540, 626 706, 532 816 A 28 28 0 0 1 492 816 C 398 706, 352 540, 352 400 Z"/>
+  </symbol>
+
+  <!-- Food-forward alternative: rimmed bowl + one arc (steam AND radar sweep). -->
+  <symbol id="bowlping" viewBox="0 0 1024 1024">
+    <path fill="currentColor" d="M 268 512 L 756 512 A 26 26 0 0 1 782 538 A 26 26 0 0 1 756 564
+      L 736 564 A 224 200 0 0 1 288 564 L 268 564 A 26 26 0 0 1 242 538 A 26 26 0 0 1 268 512 Z"/>
+    <path d="M 356 348 A 200 200 0 0 1 668 348" fill="none" stroke="currentColor"
+          stroke-width="60" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- Previous decision: pin + one concentric arc. No food signal. -->
+  <symbol id="pinarc" viewBox="0 0 1024 1024">
+    <path fill="currentColor" fill-rule="evenodd"
+      d="M358.2 660.8 A200 200 0 1 1 665.8 660.8 L512 846 Z
+         M588 533 A76 76 0 1 0 436 533 A76 76 0 1 0 588 533 Z"/>
+    <path d="M250 349 A320 320 0 0 1 774 349" fill="none" stroke="currentColor"
+          stroke-width="68" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ---- rejected, kept as evidence ---- -->
+  <symbol id="rej-smile" viewBox="0 0 1024 1024">
+    <path fill="currentColor" fill-rule="evenodd"
+      d="M358.2 660.8 A200 200 0 1 1 665.8 660.8 L512 846 Z
+         M392 500 L632 500 A120 100 0 0 1 392 500 Z"/>
+  </symbol>
+  <symbol id="rej-bite" viewBox="0 0 1024 1024">
+    <path fill="currentColor" fill-rule="evenodd"
+      d="M335.1 593.9 A230 230 0 1 1 688.9 593.9 L512 807 Z
+         M798.2 299.1 A110 110 0 1 0 578.2 299.1 A110 110 0 1 0 798.2 299.1 Z"/>
+  </symbol>
+  <symbol id="rej-basket" viewBox="0 0 1024 1024">
+    <path fill="currentColor" d="M 260 483 L 764 483 A 28 28 0 0 1 792 511 A 28 28 0 0 1 764 539
+      L 744 539 A 232 206 0 0 1 280 539 L 260 539 A 28 28 0 0 1 232 511 A 28 28 0 0 1 260 483 Z"/>
+    <path d="M318.8 459.2 A200 200 0 0 1 705.2 459.2" fill="none" stroke="currentColor"
+          stroke-width="64" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="rej-arrow" viewBox="0 0 1024 1024">
+    <path fill="currentColor" d="
+      M 362 238 A 34 34 0 0 1 430 238 L 430 410 L 362 410 Z
+      M 478 238 A 34 34 0 0 1 546 238 L 546 410 L 478 410 Z
+      M 594 238 A 34 34 0 0 1 662 238 L 662 410 L 594 410 Z
+      M 362 396 L 662 396 C 730 446, 700 586, 512 820 C 324 586, 294 446, 362 396 Z"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+
+  <h1>HungryNow — App Icon</h1>
+  <p class="sub">Revised twice on 2026-09-08. First because the original mark — a location pin with
+  one concentric arc — carried no food signal at all, which was a hole in the reasoning rather than
+  a trade-off worth keeping: <em>portfolio-art-direction.md</em> Decision 3 justified the pin with
+  “it says <em>find a place near me</em>, which is what the app does”, and the app does not find
+  places, it answers one button that says <strong>I'm Hungry</strong>. Then again to carry all three
+  ideas Sadri asked for — <strong>food, time, place</strong> — in a single mark.</p>
+  <p class="meta">Foreground layers in <code>app-icon-foreground-fork-clock-pin.svg</code>,
+  <code>-fork-pin.svg</code>, <code>-bowl-ping.svg</code>, <code>-pin-arc.svg</code>,
+  <code>-pin-only.svg</code></p>
+
+  <!-- ============================================================ -->
+  <h2>Three components — it works, with one argument against</h2>
+  <div class="callout">
+    <p><strong>It fits, and it survives 29pt.</strong> That was the open question and the answer
+    is yes: <em>food</em> in the tines, <em>time</em> in the clock counter, <em>place</em> in the
+    taper to a point. The clock is legible all the way down because it sits in the body's widest
+    part, where there is room for a 256-unit face.</p>
+    <p><strong>The argument against is not technical, it's redundancy.</strong> The icon never
+    appears without the word <em>HungryNow</em> directly beneath it. “Now” is already said, in
+    letters, by the label — so a third of the icon's complexity budget goes to restating the one
+    component the user can already read. Food and place are <em>not</em> in the name. That is the
+    whole case for two components, and it is a strategy call rather than a drawing problem, so
+    it's Sadri's to make.</p>
+  </div>
+
+  <div class="compare">
+    <div class="card">
+      <div class="tile t-light ring"><svg class="mark"><use href="#trio"/></svg></div>
+      <span class="badge b-yes">Asked for · three components</span>
+      <h3>Fork · clock · pin</h3>
+      <p>Tines, a clock counter and a pin taper in one path. Busiest of the set and the only one
+      that carries all three ideas. Thinnest feature is the 42-unit clock hand — 1.19pt at 29pt,
+      which now sets the whole icon's floor.</p>
+    </div>
+    <div class="card">
+      <div class="tile t-light ring"><svg class="mark"><use href="#forkpin"/></svg></div>
+      <span class="badge b-alt">Two components</span>
+      <h3>Fork-pin</h3>
+      <p>The same mark with the clock removed. Food and place fused, nothing else — and no counter
+      at all, so nothing can go opaque-wrong in the tinted and clear variants. This is the version
+      that survives being shrunk, cropped or badly reproduced.</p>
+    </div>
+    <div class="card">
+      <div class="tile t-light ring"><svg class="mark"><use href="#bowlping"/></svg></div>
+      <span class="badge b-alt">Food-forward</span>
+      <h3>Bowl &amp; ping</h3>
+      <p>Most food-legible mark drawn and the safest small — two fat forms, nothing fine. The arc
+      doubles as steam and as screen 05's radar sweep. Cost: “near me” is gone.</p>
+    </div>
+    <div class="card">
+      <div class="tile t-light ring"><svg class="mark"><use href="#pinarc"/></svg></div>
+      <span class="badge b-out">Superseded</span>
+      <h3>Pin &amp; arc</h3>
+      <p>The 2026-09-07 decision, kept as the fallback. Clear, well-built, and says nothing about
+      food — it would sit unremarked among a hundred nearby-discovery apps.</p>
+    </div>
+  </div>
+
+  <p class="meta" style="margin-top:28px"><strong style="color:var(--ink)">The constraint the
+  whole set came from:</strong> detail small enough to sit inside a <em>pin's counter</em> is
+  around 2pt at 29pt and vanishes — which is why the food signal had to move into the silhouette,
+  and why the clock had to go in the <em>body</em> rather than the head. Nothing here is inside
+  the old counter, because nothing can be.</p>
+
+  <!-- ============================================================ -->
+  <h2>Size ladder — the 29pt test</h2>
+  <div class="ladder">
+    <div class="rung"><div class="tile t-light ring s180"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">180 · @3x app</span></div>
+    <div class="rung"><div class="tile t-light ring s120"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">120 · @2x app</span></div>
+    <div class="rung"><div class="tile t-light ring s83"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">83.5 · iPad</span></div>
+    <div class="rung"><div class="tile t-light ring s60"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">60 · Spotlight</span></div>
+    <div class="rung"><div class="tile t-light ring s40"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">40 · notifications</span></div>
+    <div class="rung"><div class="tile t-light ring s29"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">29 · Settings</span></div>
+  </div>
+  <p class="meta" style="margin-top:22px">This row is the gate, and the three-component mark spends
+  almost all of its margin to pass it. Measured at 29pt:</p>
+  <div class="tablewrap" style="margin:16px 0 20px">
+  <table style="min-width:420px">
+    <thead><tr><th>Feature</th><th>Units</th><th>At 29pt</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Clock hand stroke</td><td><code>42</code></td><td><code>1.19pt</code></td><td>thinnest — sets the floor</td></tr>
+      <tr><td>Wall, clock edge to outline</td><td><code>45</code></td><td><code>1.27pt</code></td><td>closes up if the clock grows</td></tr>
+      <tr><td>Tine gap</td><td><code>52</code></td><td><code>1.47pt</code></td><td>the food signal</td></tr>
+      <tr><td>Clock counter, diameter</td><td><code>256</code></td><td><code>7.25pt</code></td><td>comfortable</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="meta"><strong style="color:var(--ink)">So: don't thin the hands, don't enlarge the clock
+  (it eats the wall), and don't add a fourth tine</strong> — four forces the gaps to 40 units
+  (1.13pt) and they close. Verified by render at 340, 120, 87 (29pt @3x) and 58px. Same row for the
+  bowl, which has none of these constraints, for comparison:</p>
+  <div class="ladder" style="margin-top:20px">
+    <div class="rung"><div class="tile t-light ring s120"><svg class="mark"><use href="#bowlping"/></svg></div><span class="cap">120</span></div>
+    <div class="rung"><div class="tile t-light ring s60"><svg class="mark"><use href="#bowlping"/></svg></div><span class="cap">60</span></div>
+    <div class="rung"><div class="tile t-light ring s40"><svg class="mark"><use href="#bowlping"/></svg></div><span class="cap">40</span></div>
+    <div class="rung"><div class="tile t-light ring s29"><svg class="mark"><use href="#bowlping"/></svg></div><span class="cap">29</span></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>Appearance variants — same shape, never swapped</h2>
+  <div class="appearances">
+    <div class="rung"><div class="tile t-light ring"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">Default (light)</span></div>
+    <div class="rung"><div class="tile t-dark"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">Dark</span></div>
+    <div class="rung"><div class="tile t-tint-d"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">Tinted (dark)</span></div>
+    <div class="rung"><div class="tile t-tint-l"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">Tinted (light)</span></div>
+    <div class="rung"><div class="tile t-clear"><svg class="mark"><use href="#trio"/></svg></div><span class="cap">Clear (approx.)</span></div>
+  </div>
+  <p class="meta" style="margin-top:22px">Only the fills change — HIG forbids swapping core elements
+  between variants, so there is no “simpler dark version”. <strong>Check the clear tile
+  carefully.</strong> The clock is a real hole in the artwork, and every hole is a place where the
+  system's own recolouring shows through; the two-component fork-pin has no counter at all, which is
+  the quiet reason it is the more robust mark. The tinted and clear tiles here are approximations —
+  the real ones are system-generated from the layered Icon Composer file, and iOS 27 composites
+  extra Liquid Glass layers into the artwork itself.</p>
+
+  <!-- ============================================================ -->
+  <h2>In place, on a Home Screen</h2>
+  <div class="screens">
+    <div class="phone light">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="grid">
+        <div class="app"><div class="tile n1"></div><span class="lbl">Maps</span></div>
+        <div class="app"><div class="tile n2"></div><span class="lbl">Notes</span></div>
+        <div class="app"><div class="tile n3"></div><span class="lbl">Wallet</span></div>
+        <div class="app"><div class="tile n4"></div><span class="lbl">Weather</span></div>
+        <div class="app"><div class="tile t-light ring"><svg class="mark"><use href="#trio"/></svg></div><span class="lbl">HungryNow</span></div>
+        <div class="app"><div class="tile n5"></div><span class="lbl">Photos</span></div>
+        <div class="app"><div class="tile n6"></div><span class="lbl">Books</span></div>
+        <div class="app"><div class="tile n7"></div><span class="lbl">Music</span></div>
+      </div>
+    </div>
+    <div class="phone dark">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮</span></div>
+      <div class="grid">
+        <div class="app"><div class="tile n1"></div><span class="lbl">Maps</span></div>
+        <div class="app"><div class="tile n2"></div><span class="lbl">Notes</span></div>
+        <div class="app"><div class="tile n3"></div><span class="lbl">Wallet</span></div>
+        <div class="app"><div class="tile n4"></div><span class="lbl">Weather</span></div>
+        <div class="app"><div class="tile t-dark"><svg class="mark"><use href="#trio"/></svg></div><span class="lbl">HungryNow</span></div>
+        <div class="app"><div class="tile n5"></div><span class="lbl">Photos</span></div>
+        <div class="app"><div class="tile n6"></div><span class="lbl">Books</span></div>
+        <div class="app"><div class="tile n7"></div><span class="lbl">Music</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="meta" style="margin-top:22px">Neighbours are flat neutrals on purpose — real icons would
+  flatter this one. The 1px hairline on the light tile is only for <em>this page</em>, where blush
+  sits on blush; on a real Home Screen the wallpaper does that job and the shipped tile carries
+  <strong>no border</strong>.</p>
+
+  <!-- ============================================================ -->
+  <h2>Drawn and rejected — do not redraw these</h2>
+  <div class="rejects">
+    <div class="rej">
+      <div class="tile t-light ring"><svg class="mark"><use href="#rej-smile"/></svg></div>
+      <h3>Bowl as the pin's counter</h3>
+      <p>A flat-topped void inside a circle is a <strong>mouth</strong>. The pin becomes a face.</p>
+    </div>
+    <div class="rej">
+      <div class="tile t-light ring"><svg class="mark"><use href="#rej-bite"/></svg></div>
+      <h3>Bite out of the pin</h3>
+      <p>Reads as two overlapping blobs, not a bite — and invites an Apple-logo comparison.</p>
+    </div>
+    <div class="rej">
+      <div class="tile t-light ring"><svg class="mark"><use href="#rej-basket"/></svg></div>
+      <h3>Bowl with the arc touching</h3>
+      <p>The arc becomes a <strong>handle</strong> and the mark is a picnic basket — the grocery-app
+      trap Decision 3 rejected the pomegranate for.</p>
+    </div>
+    <div class="rej">
+      <div class="tile t-light ring"><svg class="mark"><use href="#rej-arrow"/></svg></div>
+      <h3>Fork-pin with a flared belly</h3>
+      <p>Flaring below the tine base turns the silhouette into an <strong>arrowhead</strong>.
+      The widest point must be the shoulder itself.</p>
+    </div>
+  </div>
+  <p class="meta" style="margin-top:22px">Two more that died the same way and aren't worth a tile:
+  a bowl tapering to a point reads as a <em>shield</em>, and cutting tine slots into a round pin head
+  starves the outer tines to ~28 units because the circle curves away from them. The fork head has
+  to be a flat-topped block; that is a geometric fact, not a style preference.</p>
+
+  <!-- ============================================================ -->
+  <h2>Colour</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Layer</th><th>Light</th><th>Dark</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Background</td>
+        <td><span class="sw" style="background:#F7F1EF"></span><code>#F7F1EF</code></td>
+        <td><span class="sw" style="background:#241016"></span><code>#241016</code></td>
+        <td>Blush / Wine-black — flat, no gradient</td></tr>
+      <tr><td>Foreground</td>
+        <td><span class="sw" style="background:#A6243D"></span><code>#A6243D</code></td>
+        <td><span class="sw" style="background:#F58396"></span><code>#F58396</code></td>
+        <td>HeroAccentSurface, graphical use — 6.39:1 on blush</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="meta" style="margin-top:16px">Pistachio appears nowhere. It means <em>specialty</em> in
+  the app, and an icon has no hero/specialty distinction to encode — putting it here makes it
+  ornament, which <em>visual-identity.md</em> forbids for both accents.</p>
+
+  <!-- ============================================================ -->
+  <h2>Build notes &amp; what's still open</h2>
+  <div class="notes">
+    <div class="col">
+      <h3 style="margin-bottom:14px">Icon Composer</h3>
+      <ul>
+        <li><strong>Two layers, not a flat PNG.</strong> Background = solid blush; foreground = the
+        fork-pin SVG. Layering is what earns the system-generated variants and the Liquid Glass
+        highlights.</li>
+        <li><strong>Import the SVG, don't re-trace it.</strong> Every dimension in the table above
+        is tuned to the 29pt threshold; a hand-drawn version will not be.</li>
+        <li><strong>Crisp edges only.</strong> No shadow, no feather, no inner glow — soft edges
+        break the system-drawn specular highlights.</li>
+        <li><strong>The outline is one continuous subpath</strong> tracing tines and body together,
+        deliberately. The first attempt drew the tines as separate rectangles overrunning the body,
+        and under <code>evenodd</code> those overlaps became holes — white slivers across every tine
+        join. Don't reintroduce the overlap.</li>
+        <li><strong>The clock hands are one connected L polygon</strong>, also deliberately. Two
+        capsules meeting at the clock's centre overlap there, and that overlap punches a hole
+        straight through the middle of the face.</li>
+        <li><strong>Every corner is filleted (2026-09-09), and that is not a HIG conflict.</strong>
+        “Crisp edges only” forbids blur and feathering, not curvature — a rounded corner is still a
+        crisp edge, and <em>visual-identity.md</em> already asks for rounded rendering. Notch floors
+        became full semicircular U's (the biggest single gain: square notches read as slots, U's read
+        as a fork), hand ends and elbows got caps, and the pin tip got an <code>r 34</code> fillet.
+        <strong>r 48 was tested and rejected</strong> — at 48 the tip reads as a teardrop and the
+        “place” signal goes.</li>
+        <li>Content is a 390×600 box centred on a 1024 canvas, so corner masking can't truncate it.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3 style="margin-bottom:14px">Open / verify</h3>
+      <ul>
+        <li class="open">Pick two components or three. Three is drawn and works; the case against it
+        is redundancy with the word “HungryNow” sitting under the icon, not feasibility.</li>
+        <li class="open">Confirm the 29pt row on a real device. A browser at 29 CSS pixels is not a
+        Settings list.</li>
+        <li class="open">iOS 27 changed icon guidance for the second year running — check Apple's
+        live Icon Composer docs before shipping. <em>apple-hig.md</em> is stale on exactly this
+        point and says so.</li>
+        <li class="open">If the fork-pin is adopted, <em>portfolio-art-direction.md</em> Decision 3
+        needs its revision recorded, not just this file.</li>
+        <li>The pomegranate is <strong>not</strong> revived by this. It references the palette's
+        name, which nobody outside the vault knows, and reads as a grocery app.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    HungryNow · icon revised 2026-09-08 against <em>product-overview.md</em> (“one button: I'm
+    Hungry”), <em>visual-identity.md</em> colour tokens, and <em>apple-hig.md</em> → Foundations →
+    App icons. Self-contained: no external dependencies. This page commits to the blush ground in
+    both system themes on purpose — it shows the light <em>and</em> dark tiles side by side, so the
+    surrounding luminance has to be a known constant or the comparison lies.
+  </footer>
+
+</div>
+</body>
+</html>

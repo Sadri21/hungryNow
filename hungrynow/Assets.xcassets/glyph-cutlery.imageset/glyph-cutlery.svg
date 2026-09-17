@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="1.8"
+     stroke-linecap="round" stroke-linejoin="round"
+     role="img" aria-label="Picked for you">
+  <title>HungryNow interface glyph — picked for you</title>
+  <path d="M5 3v7"/>
+  <path d="M9 3v7"/>
+  <path d="M3 3v5a4 4 0 0 0 8 0V3"/>
+  <path d="M7 12v9"/>
+  <path d="M19 3c-4 3-4 8 0 9V3Z"/>
+  <path d="M19 12v9"/>
+</svg>

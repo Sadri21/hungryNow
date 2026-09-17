@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HungryNow — Restaurant details</title>
+<link rel="stylesheet" href="redesign.css">
+<style>
+.screen-place-detail .statusbar{border-bottom:0;background:var(--surface)}
+.detail-appbar{min-height:60px;padding:8px 16px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;border-bottom:1px solid transparent;background:var(--surface);z-index:2}
+.detail-appbar.scrolled{border-bottom-color:var(--line)}
+.detail-appbar .back{width:44px;height:44px;display:grid;place-items:center;margin:0;color:var(--ink)}
+.detail-appbar .back .icon{width:22px;height:22px}
+.detail-appbar strong{text-align:center;font-size:15px;line-height:1.3;opacity:0;transition:opacity 160ms ease-out}
+.detail-appbar.scrolled strong{opacity:1}
+.detail-main{padding:0 0 max(28px,env(safe-area-inset-bottom));background:var(--paper)}
+.detail-heading{padding:24px 24px 20px}
+.detail-heading h1{font-size:32px;line-height:1.08;margin-bottom:10px}
+.detail-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.detail-meta .rating{display:inline-flex;align-items:center;gap:4px;color:var(--accent-text);font-weight:700}
+.detail-meta .icon{width:15px;height:15px}
+.detail-type{margin-top:7px;color:var(--muted);font-size:13px}
+.detail-action{padding:0 24px 20px}.detail-action .primary{min-height:52px}
+.detail-tabs{position:sticky;top:0;z-index:1;display:grid;grid-template-columns:1fr 1fr;padding:0 24px;background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.detail-tab{min-height:48px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-weight:700}
+.detail-tab[aria-selected="true"]{color:var(--accent-text);border-bottom-color:var(--accent)}
+.detail-panel[hidden]{display:none}
+.detail-section{padding:22px 24px;border-bottom:1px solid var(--line)}
+.detail-section h2{font-size:20px;margin-bottom:10px}
+.detail-section>p{font-size:15px;color:var(--muted)}
+.service-list{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px;color:var(--sage-text);font-size:13px;font-weight:700}
+.service-list span{display:inline-flex;align-items:center;gap:6px}.service-list .icon{width:15px;height:15px}
+.info-list{border-bottom:1px solid var(--line)}
+.info-row{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:17px 24px;border-top:1px solid var(--line)}
+.info-row:first-child{border-top:0}.info-row>.icon{width:20px;height:20px;margin-top:2px;color:var(--accent-text)}
+.info-row small{display:block;margin-bottom:3px;color:var(--muted);font-size:12px}.info-row p{font-size:14px;line-height:1.45}
+.open-now{color:var(--sage-text);font-weight:700}
+.review-summary{display:grid;grid-template-columns:84px 1fr;gap:20px;align-items:center;padding:24px;border-bottom:1px solid var(--line)}
+.review-score strong{display:block;font-size:42px;line-height:1;font-variant-numeric:tabular-nums}.review-score span{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+.rating-bars{display:grid;gap:5px}.rating-line{display:grid;grid-template-columns:12px 1fr;gap:8px;align-items:center;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}.rating-track{height:5px;border-radius:5px;background:var(--surface);overflow:hidden}.rating-fill{display:block;height:100%;border-radius:inherit;background:var(--accent)}
+.review-list{padding:0 24px}.review-card{padding:20px 0;border-bottom:1px solid var(--line)}.review-card:last-child{border-bottom:0}
+.review-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.review-person{display:flex;align-items:center;gap:10px;min-width:0}.review-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--accent-text);font-size:13px;font-weight:700;flex:none}.review-person strong{font-size:14px}.review-stars{color:var(--accent-text);font-size:12px;white-space:nowrap}.review-card p{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.5}.review-card time{display:block;margin-top:8px;color:var(--muted);font-size:11px}
+.review-load-state{padding:20px 24px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}.review-load-state[hidden]{display:none}
+.detail-attribution{padding:20px 24px;color:var(--muted);font-size:11px;line-height:1.45;text-align:center}
+.detail-state{display:flex;min-height:610px;padding:24px;align-items:center;justify-content:center;text-align:center}.detail-state[hidden]{display:none}.detail-state-inner{max-width:290px}.detail-state .icon{width:48px;height:48px;color:var(--accent-text);margin-bottom:20px}.detail-state h1{font-size:28px;margin-bottom:12px}.detail-state p{color:var(--muted);font-size:15px}.detail-state .secondary{margin-top:24px}
+.detail-skeleton{width:100%;max-width:310px}.skeleton-line,.skeleton-photo{background:var(--surface);border-radius:10px}.skeleton-line{height:14px;margin-bottom:12px}.skeleton-line.title{height:30px;width:78%}.skeleton-line.short{width:56%}.skeleton-photo{height:220px;margin-top:24px;border-radius:20px}
+.hungrynow-context{position:relative;overflow:hidden;padding:24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.hungrynow-context h1{max-width:245px;font-size:32px;line-height:1.08;margin-bottom:12px}
+.hungrynow-context>p{max-width:calc(100% - 132px);color:var(--muted);font-size:15px;position:relative;z-index:1}
+.recommendation-illustration{position:absolute;right:16px;top:14px;width:108px;height:108px;object-fit:contain;pointer-events:none}
+.hungrynow-context .detail-action{padding:20px 0 0;position:relative;z-index:1}.hungrynow-context .detail-action .primary{min-height:52px}
+.provider-shell{margin:24px;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:var(--paper)}
+.provider-header{min-height:64px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.provider-header strong{font-size:15px}.provider-header small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.gmp-attribution{flex:none;color:var(--muted);font-family:Roboto,-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;font-style:normal;font-weight:400;white-space:nowrap}
+.provider-shell .detail-heading{padding:20px 16px 16px}.provider-shell .detail-heading h2{font-size:28px;margin-bottom:12px}
+.provider-shell .detail-tabs{position:static;padding:0 16px}
+.provider-shell .detail-section{padding:20px 16px}.provider-shell .info-row{padding:16px}.provider-shell .review-summary{padding:20px 16px}.provider-shell .review-list{padding:0 16px}
+.provider-shell .detail-attribution{padding:16px;font-size:12px;border-top:1px solid var(--line)}
+@media(max-height:740px) and (max-width:450px){.detail-heading{padding-top:16px}.detail-section{padding-top:16px;padding-bottom:16px}}
+@media(prefers-reduced-motion:reduce){.detail-appbar strong{transition:none}}
+</style>
+<script defer src="prototype.js?v=20260916-provider-review-loading"></script>
+</head>
+<body>
+<svg class="svg-sprite" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+<symbol id="directions-navigation-glyph" viewBox="0 0 24 24"><path d="M20.1 3.8c1.1-.42 2.12.63 1.7 1.73l-5.9 15.9c-.4 1.08-1.88 1.25-2.52.3a1.7 1.7 0 0 1-.24-.58l-1.25-5.42a2 2 0 0 0-1.5-1.5l-5.42-1.25a1.7 1.7 0 0 1-.28-3.28L20.1 3.8Z" fill="currentColor" stroke="currentColor" stroke-width=".65" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="prototype-label"><a href="index.html">All screens</a> &nbsp; / &nbsp; 06A · Restaurant details</div>
+<div class="device">
+<div class="screen screen-place-detail">
+<div class="statusbar" aria-hidden="true">
+<span>9:41</span>
+<span class="status-icons"><svg viewBox="0 0 20 14" fill="currentColor"><rect x="1" y="9" width="3" height="5" rx="1"/><rect x="6" y="6" width="3" height="8" rx="1"/><rect x="11" y="3" width="3" height="11" rx="1"/><rect x="16" width="3" height="14" rx="1"/></svg><svg viewBox="0 0 20 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="15" height="10" rx="2"/><path d="M18 5v4"/><path stroke-width="6" d="M4 7h9"/></svg></span>
+</div>
+<header class="detail-appbar">
+<a class="back" href="screen-06-result.html" aria-label="Back to recommendation"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></a>
+<strong>Restaurant details</strong>
+<span aria-hidden="true"></span>
+</header>
+<main class="main detail-main">
+<div id="place-detail-content">
+<section class="hungrynow-context" aria-labelledby="hungrynow-reason-title">
+<img class="recommendation-illustration" src="home-rounded-clock-setting.png" alt="" aria-hidden="true">
+<h1 id="hungrynow-reason-title">Why this one</h1>
+<p id="detail-recommendation-reason">A casual spot for a generous plate of rice and curry, with plenty to choose from at the counter.</p>
+<div class="detail-action"><button class="primary" data-action="directions" id="detail-directions"><span>Directions</span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#directions-navigation-glyph"/></svg></button></div>
+</section>
+<section class="provider-shell" aria-labelledby="detail-place-name">
+<header class="provider-header"><span><strong>Place information</strong><small>Photos, hours and reviews</small></span><span class="gmp-attribution" translate="no">Google Maps</span></header>
+<section class="detail-heading">
+<h2 id="detail-place-name">Restoran Nasi Kandar Ar Rashid</h2>
+<div class="detail-meta">
+<span class="rating"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2.8 2.78 5.64 6.22.9-4.5 4.39 1.06 6.2L12 17l-5.56 2.93 1.06-6.2L3 9.34l6.22-.9L12 2.8Z"/></svg><span id="detail-rating">4.9</span></span>
+<span aria-hidden="true">·</span><span id="detail-review-count">1.5K reviews</span>
+<span aria-hidden="true">·</span><span id="detail-price">Rp50k–150k</span>
+</div>
+<p class="detail-type" id="detail-type">Nasi kandar · Casual dining</p>
+</section>
+<!-- NATIVE IMPLEMENTATION WARNING: render GooglePlacesSwift.PlaceDetailsView media with .media() (or allContent). Google owns the photo collage/gallery, image count, loading, and attribution; do not render fixed fixture photos or an app-owned carousel. If GooglePlacesSwift is missing, tell Sadri the package must be installed/configured and stop—never substitute these HTML fixtures in native code. -->
+<div class="detail-tabs" role="tablist" aria-label="Restaurant information">
+<button class="detail-tab" role="tab" id="overview-tab" aria-selected="true" aria-controls="overview-panel" data-detail-tab="overview">Overview</button>
+<button class="detail-tab" role="tab" id="reviews-tab" aria-selected="false" aria-controls="reviews-panel" data-detail-tab="reviews">Reviews</button>
+</div>
+<div class="detail-panel" id="overview-panel" role="tabpanel" aria-labelledby="overview-tab">
+<section class="detail-section"><h2>About</h2><p id="detail-about">A casual spot for a generous plate of rice and curry, with plenty to choose from at the counter.</p><div class="service-list" aria-label="Available services"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Dine-in</span><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>Takeaway</span></div></section>
+<div class="info-list">
+<div class="info-row"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg><div><small>Address</small><p id="detail-address">Jl. Sunset Road, Seminyak</p></div></div>
+<div class="info-row"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><small>Hours</small><p><span class="open-now">Open</span> · Closes at 10:00 PM</p></div></div>
+<div class="info-row"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 3h3l2 5-2 2a14 14 0 0 0 4 4l2-2 5 2v3a4 4 0 0 1-4 4A14 14 0 0 1 3 7a4 4 0 0 1 4-4Z"/></svg><div><small>Phone</small><p>+62 361 555 0148</p></div></div>
+<div class="info-row"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg><div><small>Website</small><p>Visit restaurant website</p></div></div>
+</div>
+</div>
+<div class="detail-panel" id="reviews-panel" role="tabpanel" aria-labelledby="reviews-tab" hidden>
+<section class="review-summary" aria-label="Rating summary"><div class="review-score"><strong id="detail-review-score">4.9</strong><span id="detail-review-total">1.5K reviews</span></div><div class="rating-bars" aria-hidden="true"><div class="rating-line"><span>5</span><div class="rating-track"><span class="rating-fill" style="width:88%"></span></div></div><div class="rating-line"><span>4</span><div class="rating-track"><span class="rating-fill" style="width:9%"></span></div></div><div class="rating-line"><span>3</span><div class="rating-track"><span class="rating-fill" style="width:2%"></span></div></div><div class="rating-line"><span>2</span><div class="rating-track"><span class="rating-fill" style="width:1%"></span></div></div><div class="rating-line"><span>1</span><div class="rating-track"><span class="rating-fill" style="width:1%"></span></div></div></div></section>
+<!-- Prototype fixtures only. Native must use GooglePlacesSwift.PlaceDetailsView with .reviews(); Google owns review count, ordering, loading, and attribution. -->
+<div class="review-list" aria-label="Review highlights">
+<article class="review-card"><div class="review-head"><div class="review-person"><span class="review-avatar" aria-hidden="true">MA</span><strong>Maya A.</strong></div><span class="review-stars" aria-label="5 out of 5 stars">★★★★★</span></div><p>Plenty of curry choices and the staff helped us build a plate without rushing.</p><time datetime="2026-08">A month ago</time></article>
+<article class="review-card"><div class="review-head"><div class="review-person"><span class="review-avatar" aria-hidden="true">DK</span><strong>Daniel K.</strong></div><span class="review-stars" aria-label="5 out of 5 stars">★★★★★</span></div><p>Generous portions, lively atmosphere, and easy to order even on a first visit.</p><time datetime="2026-07">2 months ago</time></article>
+<article class="review-card"><div class="review-head"><div class="review-person"><span class="review-avatar" aria-hidden="true">NS</span><strong>Nadia S.</strong></div><span class="review-stars" aria-label="4 out of 5 stars">★★★★☆</span></div><p>The curry was rich and satisfying. It becomes busy around dinner, so arrive early.</p><time datetime="2026-06">3 months ago</time></article>
+<article class="review-card"><div class="review-head"><div class="review-person"><span class="review-avatar" aria-hidden="true">RB</span><strong>Rizky B.</strong></div><span class="review-stars" aria-label="5 out of 5 stars">★★★★★</span></div><p>A reliable stop when you want a filling meal with several side dishes to choose from.</p><time datetime="2026-05">4 months ago</time></article>
+<article class="review-card"><div class="review-head"><div class="review-person"><span class="review-avatar" aria-hidden="true">JT</span><strong>Jamie T.</strong></div><span class="review-stars" aria-label="5 out of 5 stars">★★★★★</span></div><p>Fast service and a relaxed open-air dining area. The spicy curries were the highlight.</p><time datetime="2026-04">5 months ago</time></article>
+</div>
+<div class="review-load-state" id="review-load-state" role="status" aria-live="polite">Loading more reviews…</div>
+</div>
+<p class="detail-attribution">Place information and reviews provided by Google Maps · Prototype fixture data</p>
+</section>
+</div>
+<section class="detail-state" id="place-detail-loading" aria-live="polite" hidden><div class="detail-skeleton" aria-label="Loading restaurant details"><div class="skeleton-line title"></div><div class="skeleton-line short"></div><div class="skeleton-photo"></div></div></section>
+<section class="detail-state" id="place-detail-error" hidden><div class="detail-state-inner"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg><h1>Details aren’t available</h1><p>The place-information limit may have been reached, or the connection was interrupted.</p><a class="secondary" href="screen-06-result.html">Back to recommendation</a></div></section>
+</main>
+<div class="home-indicator" aria-hidden="true"></div>
+</div>
+</div>
+<dialog id="demo-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Prototype preview</h2><p id="dialog-copy"></p><form method="dialog"><button class="primary">Back to preview</button></form></dialog>
+</body>
+</html>

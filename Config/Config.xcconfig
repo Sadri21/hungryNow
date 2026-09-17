@@ -1,0 +1,5 @@
+// Config.xcconfig
+// Base configuration for HungryNow.
+// Optionally includes Secrets.xcconfig if present locally without failing if absent.
+
+#include? "Secrets.xcconfig"

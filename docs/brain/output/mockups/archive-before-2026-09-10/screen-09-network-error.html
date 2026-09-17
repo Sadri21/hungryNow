@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Couldn't get an answer</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Screen 09 only. Layout comes from the shared .screen-state block. */
+  /* Nothing screen-specific inside the frame — this state is the shared .screen-state shape
+     with different copy. The style block stays as the place for screen-09-only rules. */
+</style>
+</head>
+<body>
+  <p class="screen-title">09 · Couldn&#39;t get an answer<span>One state covering the retryable failures: <code>places_lookup_failed</code>, <code>recommendation_failed</code>, and any transport error. No blame, no &quot;oops&quot;, no error code shown — just what happened and the one button that helps.</span></p>
+  <div class="device">
+    <div class="island"></div>
+    <div class="screen screen-state">
+      <div class="softbg"><span class="s1"></span><span class="s2"></span></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">●●●</span></div>
+      <div class="content">
+
+        <div class="appbar">
+          <p class="bar-title">HungryNow</p>
+          <span class="state-chip">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.6"/>
+            </svg>
+            Seminyak, Bali
+          </span>
+        </div>
+
+        <div class="state-mid">
+          <div class="state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M2 8.8a16 16 0 0 1 20 0"/><path d="M5.5 12.4a11 11 0 0 1 8-3.3"/>
+              <path d="M9 16a6 6 0 0 1 3-1.4"/><circle cx="12" cy="19.5" r="1.1" fill="currentColor" stroke="none"/>
+              <path d="M3 3l18 18"/>
+            </svg>
+          </div>
+          <p class="state-headline">Couldn’t get an answer</p>
+          <p class="state-body">Check your connection and try again. If you are online, the recommendation service is briefly unavailable.</p>
+        </div>
+
+        <div class="state-cta">
+          <div class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+              <path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/>
+            </svg>
+            Try again
+          </div>
+          <p class="privacy-note">Nothing was lost — the tap is the whole request</p>
+        </div>
+
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+  <p class="callout">Not this state: <code>daily_limit_reached</code> / <code>photo_limit_reached</code> are capped for the whole day, so “Try again” would be a button guaranteed to fail. That case needs its own copy — open item in <code>app-mockups.md</code>.</p>
+</body>
+</html>

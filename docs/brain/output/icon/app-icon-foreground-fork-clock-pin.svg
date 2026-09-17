@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>HungryNow app icon — foreground layer (fork + clock + pin, rounded)</title>
+  <!--
+    THREE COMPONENTS: food = the three fork tines, time = the clock counter,
+    place = the body converging to a pin's point.
+    Icon Composer FOREGROUND layer; transparent ground by design.
+
+    ROUNDED PASS, 2026-09-09. Every corner that was a hard angle is now a
+    fillet. Note this does NOT conflict with apple-hig.md's "crisp edges only"
+    — that rule forbids blur and feathering, not curvature. A rounded corner is
+    still a crisp edge, and rounding is what visual-identity.md already asks for
+    ("rounded rendering where available").
+      notch bottoms  square floors -> full semicircular U (r 26). Biggest single
+                     improvement: square notches read as slots, U notches read
+                     as a fork
+      clock hands    square ends and elbows -> r 21 caps, r 21 outer elbow,
+                     r 12 inner elbow
+      pin tip        90deg point -> r 34 fillet. Tested r 48 as well and
+                     REJECTED it: at 48 the tip reads as a teardrop and the
+                     "place" signal goes. 34 softens without blunting
+      shoulder       the old control point (712) put a ~4deg kink where the
+                     outer tine meets the body; now 702, tangent-continuous
+
+    HOW IT IS BUILT — read before editing, this is not obvious:
+    The outline is ONE CONTINUOUS SUBPATH tracing tines and body together, with
+    no self-overlap. An earlier version drew the tines as separate rectangles
+    overrunning the body top; under fill-rule="evenodd" those overlaps became
+    HOLES — white slivers across every tine join.
+
+    Subpath order and evenodd parity:
+      1. outline (tines + body) ....... parity 1  -> filled
+      2. clock circle r128 ............ parity 2  -> hole
+      3. hands, ONE connected L ....... parity 3  -> filled again
+    The hands MUST be one polygon. Two separate capsules meeting at the clock's
+    centre overlap there, which is parity 4 = a hole punched through the face.
+
+    Geometry (locked):
+      Tines      x 322-414, 466-558, 610-702 (92 wide, 52 gaps); tops y 212,
+                 cap centres y 258 (r 46); notch U bottoms reach y 374
+      Shoulder   y 374 — the widest point. NO flare below it: flaring turns the
+                 silhouette into an arrowhead (tested and rejected)
+      Tip        fillet centre (512, 778), arc bottom y 812
+      Clock      centre (512, 530), counter r 128; hands 42 wide, 88 up / 82 right
+    Content bbox 380 x 600, centred on (512, 512) — survives the corner mask.
+    Colour       #A6243D light / #F58396 dark. Shape never changes by variant.
+
+    29pt BUDGET — the hands are the binding dimension, not the tine gaps:
+      hand stroke 42 units .......... 1.19pt   <- thinnest feature
+      wall, clock edge to outline 45  1.27pt
+      tine gap 52 units ............. 1.47pt
+      clock counter d 256 ........... 7.25pt
+    Verified by render at 340px, 120px and 87px (29pt @3x), sharp vs rounded.
+    Do not thin the hands, do not enlarge the clock (it eats the wall), and do
+    not add a fourth tine.
+  -->
+  <path fill="#A6243D" fill-rule="evenodd" d="
+    M 322 374 L 322 258 A 46 46 0 0 1 414 258 L 414 348 A 26 26 0 0 0 466 348
+    L 466 258 A 46 46 0 0 1 558 258 L 558 348 A 26 26 0 0 0 610 348
+    L 610 258 A 46 46 0 0 1 702 258 L 702 374
+    C 702 514, 648 690, 536 802 A 34 34 0 0 1 488 802 C 376 690, 322 514, 322 374 Z
+    M 640 530 A 128 128 0 1 0 384 530 A 128 128 0 1 0 640 530 Z
+    M 491 463 A 21 21 0 0 1 533 463 L 533 497 A 12 12 0 0 0 545 509
+    L 573 509 A 21 21 0 0 1 573 551 L 512 551 A 21 21 0 0 1 491 530 Z"/>
+</svg>

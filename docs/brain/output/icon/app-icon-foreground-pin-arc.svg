@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>HungryNow app icon — foreground layer (pin + one concentric arc)</title>
+  <!--
+    Icon Composer FOREGROUND layer. Transparent background by design — the blush
+    ground is a separate background layer, so the system generates the light /
+    dark / clear / tinted variants and applies the Liquid Glass highlights.
+
+    Geometry (locked — derived, not eyeballed; do not nudge by hand):
+      Pin circle   centre (512, 533)  r 200
+      Pin tip      (512, 846)         d = 313 from centre
+      Tangency     acos(200/313) = 50.28deg off the centre->tip axis
+                   => (358.2, 660.8) and (665.8, 660.8)
+      Counter      r 76, concentric with the pin circle — a real hole
+                   (fill-rule evenodd), NOT a blush dot laid on top, so the
+                   tinted/clear variants keep it
+      Arc          concentric with the pin circle, r 320, 110deg span,
+                   68 stroke, round caps
+    Content bbox   592 x 667, centred on (512, 512) — survives the corner mask.
+    Colour         #A6243D (HeroAccentSurface — graphical use), light appearance.
+                   Dark: #F58396.  Do not change the shape between variants.
+  -->
+  <g fill="#A6243D">
+    <path fill-rule="evenodd" d="
+      M 358.2 660.8
+      A 200 200 0 1 1 665.8 660.8
+      L 512 846
+      Z
+      M 588 533
+      A 76 76 0 1 0 436 533
+      A 76 76 0 1 0 588 533
+      Z"/>
+    <path d="M 250 349 A 320 320 0 0 1 774 349"
+          fill="none" stroke="#A6243D" stroke-width="68" stroke-linecap="round"/>
+  </g>
+</svg>

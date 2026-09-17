@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>HungryNow app icon — foreground layer, strict single-shape variant (pin only)</title>
+  <!--
+    Alternative foreground: ONE closed path, nothing else. Sadri's literal
+    "one shape" reading. Loses the icon-to-app continuity with screen 05's
+    radar that portfolio-art-direction.md bought the arc for.
+
+    Geometry:
+      Pin circle   centre (512, 447)  r 230
+      Pin tip      (512, 807)         d = 360 from centre
+      Tangency     ±50.28deg  =>  (335.1, 593.9) / (688.9, 593.9)
+      Counter      r 84, concentric (evenodd)
+    Content bbox   460 x 590, centred on (512, 512).
+  -->
+  <path fill="#A6243D" fill-rule="evenodd" d="
+    M 335.1 593.9
+    A 230 230 0 1 1 688.9 593.9
+    L 512 807
+    Z
+    M 596 447
+    A 84 84 0 1 0 428 447
+    A 84 84 0 1 0 596 447
+    Z"/>
+</svg>

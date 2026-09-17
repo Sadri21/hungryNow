@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HungryNow — Screen Flow</title>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0; background:#0B0C0E; padding:48px 24px 90px;
+    font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
+  .wrap{max-width:1400px; margin:0 auto;}
+  .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#6E7177; margin:0 0 10px;}
+  h1{color:#F4F5F7; font-size:26px; font-weight:800; margin:0 0 12px;}
+  .lede{color:#A9ACB3; font-size:14px; line-height:1.7; max-width:720px; margin:0 0 8px;}
+  .note{font-size:12.5px; color:#F0A050; background:rgba(240,160,80,.08); border-left:2px solid #F0A050;
+    padding:12px 16px; border-radius:4px; margin:18px 0 40px; max-width:720px; line-height:1.6;}
+  .note b{color:#F5EFE4;}
+  .note code{background:rgba(255,255,255,.07); padding:1px 5px; border-radius:3px;}
+  .row-label{color:#F5EFE4; font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    margin:14px 0 0; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08);}
+  .flow{display:flex; gap:14px; align-items:flex-start; overflow-x:auto; padding:8px 4px 30px;}
+  .cell{flex:0 0 auto; width:300px; text-align:center;}
+  .cell a{color:#F5EFE4; font-size:13px; font-weight:800; text-decoration:none; display:block; margin-bottom:4px;}
+  .cell a:hover{color:#F0A050;}
+  .cell .file{color:#6E7177; font-size:10.5px; font-family:ui-monospace,Menlo,monospace; margin:0 0 12px;}
+  iframe{width:300px; height:620px; border:0; border-radius:12px; background:transparent;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">HungryNow — App Mockups</p>
+  <h1>First-run flow</h1>
+  <p class="lede">Each screen is its own file, sharing one stylesheet. Edit a screen without touching the others; edit <code>shared.css</code> to change the design system everywhere at once. This page just embeds them, so it always reflects the current state of each file.</p>
+  <p class="note"><b>State, 2026-09-08:</b> all nine screens are designed. <b>Screen 06 was restructured heavily</b> — edge-to-edge media, a snap carousel, no app bar — and is the only screen anyone has actually looked at rendered. <b>02, 03 and 08 have changed and have not been seen.</b> None of them have a dark-appearance pass yet. If an embed below looks blank, your browser is blocking local iframes; click the screen title to open that file directly.</p>
+
+  <p class="row-label">Happy path</p>
+  <div class="flow">
+    <div class="cell"><a href="screen-01-launch.html" target="_blank">01 · Launch</a><p class="file">screen-01-launch.html</p><iframe src="screen-01-launch.html"></iframe></div>
+    <div class="cell"><a href="screen-02-welcome.html" target="_blank">02 · Welcome + purpose</a><p class="file">screen-02-welcome.html</p><iframe src="screen-02-welcome.html"></iframe></div>
+    <div class="cell"><a href="screen-03-permission.html" target="_blank">03 · System alert</a><p class="file">screen-03-permission.html</p><iframe src="screen-03-permission.html"></iframe></div>
+    <div class="cell"><a href="screen-04-home.html" target="_blank">04 · Home</a><p class="file">screen-04-home.html</p><iframe src="screen-04-home.html"></iframe></div>
+    <div class="cell"><a href="screen-05-loading.html" target="_blank">05 · Loading</a><p class="file">screen-05-loading.html</p><iframe src="screen-05-loading.html"></iframe></div>
+    <div class="cell"><a href="screen-06-result.html" target="_blank">06 · Result</a><p class="file">screen-06-result.html</p><iframe src="screen-06-result.html"></iframe></div>
+  </div>
+
+  <p class="row-label">Edge cases — where the happy path breaks</p>
+  <div class="flow">
+    <div class="cell"><a href="screen-07-permission-denied.html" target="_blank">07 · Location off</a><p class="file">screen-07-permission-denied.html</p><iframe src="screen-07-permission-denied.html"></iframe></div>
+    <div class="cell"><a href="screen-08-no-results.html" target="_blank">08 · Nothing nearby</a><p class="file">screen-08-no-results.html</p><iframe src="screen-08-no-results.html"></iframe></div>
+    <div class="cell"><a href="screen-09-network-error.html" target="_blank">09 · Couldn’t get an answer</a><p class="file">screen-09-network-error.html</p><iframe src="screen-09-network-error.html"></iframe></div>
+  </div>
+</div>
+</body>
+</html>
