@@ -188,3 +188,11 @@ can read the reasoning next to the code it explains. Start at
 Functionally complete and deployed; all nine screens built. Remaining work is
 verification and polish — see the checklist. Built by
 [Sadri Ashari](https://github.com/Sadri21) under the **Revaiter** brand.
+
+## Licence
+
+Published for viewing and portfolio review — **not** open source. Reuse,
+modification, and commercial use require written permission; see
+[LICENSE](LICENSE). Third-party dependencies keep their own licences, and the
+restaurant data, photos, and place details remain Google's under the Maps
+Platform and Gemini API terms.

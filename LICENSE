@@ -1,0 +1,46 @@
+Copyright (c) 2026 Sadri Ashari (Revaiter). All rights reserved.
+
+This source code is published for viewing, evaluation, and portfolio review.
+
+You MAY:
+  - read, browse, and study this repository
+  - reference it when evaluating the author's work
+
+You MAY NOT, without prior written permission from the copyright holder:
+  - copy, modify, or redistribute this code, in whole or in part
+  - use it, or any derivative of it, in any product or service
+  - use it commercially
+
+For licensing, purchase, or permission enquiries, contact the author via
+https://github.com/Sadri21
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+THIRD-PARTY COMPONENTS
+
+This repository depends on separately licensed third-party software, which
+this licence does not cover and does not restrict:
+
+  - Moya and Alamofire ...................... MIT
+  - RxSwift ................................. MIT
+  - lottie-ios .............................. Apache-2.0
+  - Google Places SDK for iOS ............... Google APIs Terms of Service
+  - firebase-admin, firebase-functions ...... Apache-2.0
+  - google-genai ............................ Apache-2.0
+  - requests ................................ Apache-2.0
+  - Pillow .................................. MIT-CMU
+
+DATA AND API TERMS
+
+Restaurant data, photographs, and place details shown by this app are supplied
+by Google and remain subject to the Google Maps Platform Terms of Service and
+the Gemini API Terms. They are not covered by this licence, and nothing here
+grants any right to that content. Photographs retrieved through the Places API
+carry their own author attributions, which the app displays as Google requires.
