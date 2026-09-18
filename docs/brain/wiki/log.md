@@ -215,3 +215,13 @@ Walked the largest accessibility text size on SE/16.4. Four real defects, one of
 **Not ours to fix:** screens 06A's stacked stars and vertical "(11.705)" at large sizes come from Google's own `GMSPlaceDetailsView`. Using their view is a recorded decision — it is why no place data is re-hosted — and its internal layout is not adjustable.
 
 **Method note.** Three passes at one screen, two of them wrong, each corrected from a screenshot. SwiftUI layout under accessibility sizes is not reliably predictable by reading code; it needs to be run and looked at.
+
+## 2026-09-18 — Reduce Motion verified; accessibility pass complete
+
+Checked on SE/16.4 with Reduce Motion on. All three intended behaviours hold: screen transitions degrade to a plain crossfade, navigation is unaffected, and the Lottie radar freezes on a static frame rather than looping.
+
+The frozen Lottie is the point, not a defect — a looping radar sweep is continuous on-screen movement, which is exactly what the setting exists to stop. The illustration still reads as "searching" without the motion. Keeping the crossfade is the other half of the same judgement, and the reasoning already in `ScreenTransition.swift` holds up: a fade has no motion vector to be sensitive to, while an instant swap would feel broken rather than accessible.
+
+**The accessibility pass is now complete** — SE layout, Dynamic Type, and Reduce Motion all verified on the oldest supported OS. It found two genuine ship-blockers that reading code did not: every glyph invisible on iOS 16, and Cancel unreachable on screen 05 at accessibility text sizes. Both were invisible on the development device at default settings.
+
+Still unverified by running: the accessibility inspector sweep (VoiceOver labels), and `daily_limit_reached`, whose screen has never actually rendered.

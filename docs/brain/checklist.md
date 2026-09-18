@@ -41,7 +41,7 @@ Full reasoning for every line here and in "SwiftUI build — open items" below l
 **Animation**
 - [x] Screen transitions — **built.** `Core/ScreenTransition.swift` provides the asymmetric scale-and-fade (0.28s, inside the vault's motion window); `RootView` and `RecommendationView` apply it via `withAnimation` + `.transition()`. Verified 2026-09-17.
 - [x] Status-bar luminance detector for screen 06 (`UIHostingController` subclass — SwiftUI can't set `preferredStatusBarStyle` directly). 4 known naive-version bugs written out in `screen-06-result.html`.
-- [ ] Verify Reduce Motion **on a device** — the code path is wired everywhere (`@Environment(\.accessibilityReduceMotion)` in `RootView`, `RecommendationView`, `SearchingView`, `PlaceDetailsView`; transitions degrade to a plain crossfade). What is untested is the behaviour with the setting actually on: radar parking on frame 172 and the stage dot ceasing to pulse.
+- [x] Verify Reduce Motion **on a device** — **done 2026-09-18** on SE/16.4. All three behaviours confirmed with the setting on: screen transitions degrade to a plain crossfade, navigation is unaffected, and the Lottie radar freezes on a static frame (`isAnimating: !reduceMotion`). Fades are deliberately kept — a fade carries no motion vector, and an instant swap is the thing the rule exists to prevent.
 
 **Before any of the above:** ~~run the sizing migration on an SE~~ — **SE pass done 2026-09-18** (iPhone SE / iOS 16.4, the oldest supported OS): every screen through to Place Details checked, no layout breakage, nothing clipped or pushed off-screen. It caught a real ship-blocker — all 20 glyphs rendered blank on iOS 16 (`currentColor`, see log). **Dynamic Type slider still not walked.**
 
