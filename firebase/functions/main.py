@@ -129,6 +129,15 @@ def _get_cached_candidates(lat: float, lng: float) -> list[dict] | None:
         c.get("photoAttributions") for c in candidates
     ):
         return None
+
+    # Same rule for price ranges. A pre-priceRange entry would serve the client
+    # nothing but the 1-4 tier for up to 48h, which is a visible downgrade
+    # rather than a silent one. Keyed on the KEY's presence, not its value:
+    # plenty of real places genuinely have no priceRange (hotels, in the sample
+    # 4 of 10), so a value check would refresh those locations on every request.
+    if candidates and not any("priceRange" in c for c in candidates):
+        return None
+
     return candidates
 
 
@@ -216,6 +225,9 @@ PLACES_FIELD_MASK = ",".join([
     "places.rating",
     "places.userRatingCount",
     "places.priceLevel",
+    # Real crowd-sourced spend per person, with a currency code. Free here:
+    # rating + priceLevel already place this call in the Enterprise tier.
+    "places.priceRange",
     "places.nationalPhoneNumber",
     "places.photos",
     "places.currentOpeningHours",
@@ -268,6 +280,39 @@ def _error(message: str, status: int) -> https_fn.Response:
         status=status,
         mimetype="application/json",
     )
+
+
+def _parse_price_range(price_range) -> dict | None:
+    """Google's `priceRange` as a flat dict, or None.
+
+    Distinct from `priceLevel`: this is real reported spend per person with a
+    currency code, so it is correct in any country, whereas `priceLevel` is a
+    bare 1-4 ordinal. `units` arrives as a STRING and `endPrice` is absent for
+    open-ended ranges ("IDR250000-"), both of which the client must handle.
+    """
+    if not isinstance(price_range, dict):
+        return None
+
+    def _amount(v):
+        if not isinstance(v, dict):
+            return None
+        units = v.get("units")
+        if units is None:
+            return None
+        try:
+            return int(units)
+        except (TypeError, ValueError):
+            return None
+
+    start = _amount(price_range.get("startPrice"))
+    end = _amount(price_range.get("endPrice"))
+    currency = (
+        (price_range.get("startPrice") or {}).get("currencyCode")
+        or (price_range.get("endPrice") or {}).get("currencyCode")
+    )
+    if currency is None or (start is None and end is None):
+        return None
+    return {"currency": currency, "start": start, "end": end}
 
 
 def _parse_price_level(price_level) -> int | None:
@@ -348,6 +393,7 @@ def _fetch_nearby_candidates(lat: float, lng: float, places_key: str) -> list[di
             "rating": place.get("rating"),
             "ratingCount": place.get("userRatingCount"),
             "priceLevel": _parse_price_level(place.get("priceLevel")),
+            "priceRange": _parse_price_range(place.get("priceRange")),
             "type": place.get("primaryType"),
             "phone": place.get("nationalPhoneNumber"),
             "photoRef": refs[0] if refs else None,
@@ -589,6 +635,8 @@ def _enrich_hero(hero: dict, candidates: list[dict]) -> dict:
             hero["ratingCount"] = matched.get("ratingCount")
         if hero.get("priceLevel") is None:
             hero["priceLevel"] = matched.get("priceLevel")
+        if hero.get("priceRange") is None:
+            hero["priceRange"] = matched.get("priceRange")
         if hero.get("photoRefs") is None and matched.get("photoRefs"):
             hero["photoRefs"] = matched.get("photoRefs")
         # Google requires each photo's credit be displayed. Send one entry per
@@ -619,6 +667,8 @@ def _enrich_specialty(specialty: dict, candidates: list[dict]) -> dict:
             specialty["ratingCount"] = matched.get("ratingCount")
         if specialty.get("priceLevel") is None:
             specialty["priceLevel"] = matched.get("priceLevel")
+        if specialty.get("priceRange") is None:
+            specialty["priceRange"] = matched.get("priceRange")
         if specialty.get("openNow") is None and matched.get("openNow") is not None:
             specialty["openNow"] = matched.get("openNow")
     return specialty

@@ -1,6 +1,21 @@
 import Foundation
 import UIKit
 
+/// Real reported spend per person, straight from Google's `priceRange`.
+///
+/// **Preferred over `priceLevel` wherever it exists.** `priceLevel` is a bare 1...4
+/// ordinal with no amounts and no currency, so rendering it as money means inventing
+/// figures — which is how a Singapore restaurant came to display a rupiah range.
+/// This carries its own `currencyCode`, so it is correct in every country.
+///
+/// Coverage is partial (roughly 6 in 10 restaurants in a Jakarta sample; hotels
+/// usually have none), and `end` is absent for open-ended ranges like "IDR 250,000+".
+struct PriceRange: Decodable, Hashable {
+    let currency: String
+    let start: Int?
+    let end: Int?
+}
+
 struct RecommendationResponse: Decodable {
     let hero: HeroPick
     let specialties: [SpecialtyPick]
@@ -50,6 +65,9 @@ struct HeroPick: Decodable {
     /// the fact row is missing all three of its columns while the notes account for two.
     let priceLevel: Int?
 
+    /// Real spend per person when Google has it. Falls back to `priceLevel`.
+    let priceRange: PriceRange?
+
     /// Photos for the hero, in display order.
     ///
     /// **Fetch lazily.** `get_photo` is metered against `DAILY_PHOTO_LIMIT` (33), so
@@ -95,6 +113,7 @@ struct HeroPick: Decodable {
         rating: Double? = nil,
         ratingCount: Int? = nil,
         priceLevel: Int? = nil,
+        priceRange: PriceRange? = nil,
         photoRefs: [String]? = nil,
         photoAttributions: [String?]? = nil
     ) {
@@ -111,6 +130,7 @@ struct HeroPick: Decodable {
         self.rating = rating
         self.ratingCount = ratingCount
         self.priceLevel = priceLevel
+        self.priceRange = priceRange
         self.photoRefs = photoRefs
         self.photoAttributions = photoAttributions
     }
@@ -135,6 +155,9 @@ struct SpecialtyPick: Decodable {
     /// Google's `price_level`, 1...4.
     let priceLevel: Int?
 
+    /// Real spend per person when Google has it. Falls back to `priceLevel`.
+    let priceRange: PriceRange?
+
     init(
         name: String,
         address: String,
@@ -147,7 +170,8 @@ struct SpecialtyPick: Decodable {
         longitude: Double? = nil,
         rating: Double? = nil,
         ratingCount: Int? = nil,
-        priceLevel: Int? = nil
+        priceLevel: Int? = nil,
+        priceRange: PriceRange? = nil
     ) {
         self.name = name
         self.address = address
@@ -161,6 +185,7 @@ struct SpecialtyPick: Decodable {
         self.rating = rating
         self.ratingCount = ratingCount
         self.priceLevel = priceLevel
+        self.priceRange = priceRange
     }
 }
 

@@ -70,12 +70,15 @@ struct ResultSpecialtiesSection: View {
                                             .foregroundColor(Color.text2)
                                     }
 
-                                    if let level = pick.priceLevel {
+                                    if let priceText = FactFormatter.price(
+                                        range: pick.priceRange,
+                                        level: pick.priceLevel
+                                    ) {
                                         Text("·")
                                             .font(.system(size: 13, design: .rounded))
                                             .foregroundColor(Color.hairline)
 
-                                        Text(FactFormatter.priceRange(forLevel: level))
+                                        Text(priceText)
                                             .font(.system(size: 13, design: .rounded))
                                             .foregroundColor(Color.text2)
                                     }

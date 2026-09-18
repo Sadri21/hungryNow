@@ -90,20 +90,51 @@ enum FactFormatter {
         return "\(ratingText) (\(compactCount(count)))"
     }
 
-    /// Google's `price_level` 1...4 as "Rp", "Rp Rp", ...
-    static func priceTier(_ level: Int) -> String? {
-        guard (1...4).contains(level) else { return nil }
-        return Array(repeating: "Rp", count: level).joined(separator: " ")
+    /// Per-person price for the fact row, preferring real amounts over a guess.
+    ///
+    /// **Order matters.** Google's `priceRange` is reported spend with a currency
+    /// code, so it is correct anywhere. `priceLevel` is a bare 1...4 ordinal — it
+    /// carries no amounts and no currency, so the only honest rendering of it is a
+    /// tier, never money.
+    ///
+    /// This used to map the ordinal onto hardcoded rupiah bands, which meant a
+    /// Singapore restaurant displayed "Rp50k–150k": wrong currency, and figures
+    /// Google never supplied. Returns nil when there is nothing to say, so the
+    /// column can be omitted rather than filled with a default.
+    static func price(range: PriceRange?, level: Int?) -> String? {
+        if let range, let text = formatted(range) {
+            return text
+        }
+        if let level, (1...4).contains(level) {
+            return String(repeating: "$", count: level)
+        }
+        return nil
     }
 
-    /// Price range for per-person display on Screen 06 (e.g. "Rp50k–150k").
-    static func priceRange(forLevel level: Int) -> String {
-        switch level {
-        case 1: return "<Rp50k"
-        case 2: return "Rp50k–150k"
-        case 3: return "Rp150k–300k"
-        case 4: return "Rp300k+"
-        default: return "Rp50k–150k"
+    /// "IDR 50,000–75,000", or "IDR 250,000+" when the range is open-ended.
+    ///
+    /// Grouping separators follow the device locale, but the currency CODE is
+    /// Google's, not the device's — the price belongs to the restaurant's country,
+    /// so an Indonesian phone in Singapore must still read SGD.
+    private static func formatted(_ range: PriceRange) -> String? {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = .current
+        formatter.maximumFractionDigits = 0
+
+        func amount(_ value: Int) -> String {
+            formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+        }
+
+        switch (range.start, range.end) {
+        case let (start?, end?):
+            return "\(range.currency) \(amount(start))–\(amount(end))"
+        case let (start?, nil):
+            return "\(range.currency) \(amount(start))+"
+        case let (nil, end?):
+            return "\(range.currency) <\(amount(end))"
+        case (nil, nil):
+            return nil
         }
     }
 

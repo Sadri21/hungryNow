@@ -163,20 +163,22 @@ final class RecommendationViewModel: ObservableObject {
         }
 
         // 3. Price (per person)
-        let priceText: String
-        if let level = hero.priceLevel {
-            priceText = FactFormatter.priceRange(forLevel: level)
-        } else if let parsed = Self.extractPriceRange(from: hero.description) ?? Self.extractPriceRange(from: hero.reason) {
-            priceText = parsed
-        } else {
-            priceText = "Rp50k–150k"
-        }
+        //
+        // Google's reported range first, the 1...4 tier as a fallback, and nothing
+        // at all when neither exists. The previous version scraped a price out of
+        // the model's prose and, failing that, printed a hardcoded "Rp50k–150k" —
+        // so a restaurant with no price data showed the same confident figure as
+        // one with a known tier, in rupiah regardless of country.
+        let priceText = FactFormatter.price(range: hero.priceRange, level: hero.priceLevel)
 
-        return [
+        var facts = [
             Fact(label: "away", value: distanceText),
-            Fact(label: ratingLabel, value: ratingValue),
-            Fact(label: "per person", value: priceText)
+            Fact(label: ratingLabel, value: ratingValue)
         ]
+        if let priceText {
+            facts.append(Fact(label: "per person", value: priceText))
+        }
+        return facts
     }
 
     private static func extractRating(from text: String) -> String? {
@@ -190,18 +192,6 @@ final class RecommendationViewModel: ObservableObject {
             if r.location != NSNotFound, let range = Range(r, in: text) {
                 return String(text[range])
             }
-        }
-        return nil
-    }
-
-    private static func extractPriceRange(from text: String) -> String? {
-        let lower = text.lowercased()
-        if lower.contains("very expensive") || lower.contains("fine dining") {
-            return "Rp150k+"
-        } else if lower.contains("moderately priced") || lower.contains("moderate") || lower.contains("mid-range") {
-            return "Rp50k–150k"
-        } else if lower.contains("inexpensive") || lower.contains("budget") || lower.contains("cheap") || lower.contains("street food") {
-            return "<Rp50k"
         }
         return nil
     }
