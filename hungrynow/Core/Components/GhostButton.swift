@@ -21,8 +21,9 @@ struct GhostButton: View {
             Text(title)
                 .font(AppFont.secondaryLabel)
                 .foregroundColor(Color.text2)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .lineLimit(2)
+                .minimumScaleFactor(0.6)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.vertical, Metrics.space3)
                 .frame(maxWidth: .infinity, minHeight: Metrics.tapTarget)
                 // Without this only the label is tappable, not the full width the layout

@@ -195,3 +195,23 @@ Walked the full flow on iPhone SE (3rd gen) / iOS 16.4 — 375x667, and the olde
 **The pass paid for itself** by finding the blank-glyph bug on its first screen — see the entry above. Worth stating plainly: that bug was found by running the app on an old device, not by reading code, and nothing in the test suite or a build would have surfaced it.
 
 **Still not done: the Dynamic Type slider**, and Reduce Motion end to end. Both are behaviour rather than layout, and both remain marked done "by reading the code".
+
+## 2026-09-18 — Dynamic Type pass: Cancel was unreachable on screen 05
+
+Walked the largest accessibility text size on SE/16.4. Four real defects, one of them serious.
+
+**Screen 05 stranded the user.** `SearchingView` was a plain `VStack` in a `GeometryReader` with no `ScrollView`, so at accessibility sizes the headline alone exceeded the screen and pushed Cancel off the bottom — unreachable, with no way to abandon a search until it finished on its own. Now the headline and animation scroll while **Cancel stays pinned**: an escape hatch must never be the thing that scrolls away.
+
+**Two wrong attempts before it was right**, both caught by Sadri's screenshots rather than by reading the code:
+1. Added the `ScrollView` but also a `minHeight: geo.size.height * 0.5` on its content, meaning to stop the column collapsing at default sizes. At large sizes that forced the content taller than the viewport, so the headline bled past the scroll edge and collided with the wait note — "place." was sliced in half. Removed.
+2. Left the `Spacer`s inside the scroll content. Spacers are meaningless there (scroll content sizes to fit) and competed with the headline for space. Replaced with explicit padding.
+
+**Controls truncated their own labels.** `PrimaryButton` used `lineLimit(1)` with a 0.85 scale floor, so the primary action read "Directi…" — unreadable on the one control that matters. Now 2 lines and a 0.6 floor, matched in `SecondaryButton` and `GhostButton`, which carried the identical pattern. "I'm hungry" now wraps and reads in full.
+
+**The wait note is capped at `xxxLarge`.** It is reassurance, not content to act on; unbounded it took more of the screen than the animation it describes.
+
+**Left truncating deliberately:** the app-bar location chip. It shares a fixed-height row with the wordmark across six screens, so wrapping would break all of them. Truncating secondary context is the correct trade.
+
+**Not ours to fix:** screens 06A's stacked stars and vertical "(11.705)" at large sizes come from Google's own `GMSPlaceDetailsView`. Using their view is a recorded decision — it is why no place data is re-hosted — and its internal layout is not adjustable.
+
+**Method note.** Three passes at one screen, two of them wrong, each corrected from a screenshot. SwiftUI layout under accessibility sizes is not reliably predictable by reading code; it needs to be run and looked at.

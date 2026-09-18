@@ -25,8 +25,9 @@ struct SecondaryButton: View {
                 Text(title)
                     .font(AppFont.controlLabel)
                     .foregroundColor(Color.text)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, Metrics.space4)
             .padding(.horizontal, Metrics.margin)

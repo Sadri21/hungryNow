@@ -39,34 +39,53 @@ struct SearchingView: View {
 
                 VStack(spacing: 0) {
                     AppBar(locationName: locationName)
+                        .padding(.horizontal, Metrics.margin)
 
-                    VStack(alignment: .leading, spacing: Metrics.space1) {
-                        Text("YOUR NEXT MEAL")
-                            .font(AppFont.microLabel)
-                            .tracking(Metrics.microTracking)
-                            .foregroundColor(Color.text2)
+                    // Headline and animation scroll; Cancel does not.
+                    //
+                    // At the largest Dynamic Type sizes the headline alone is taller
+                    // than an SE screen, and this whole column used to be a plain
+                    // VStack — so Cancel was pushed off the bottom with no way to
+                    // reach it, stranding the user until the search finished on its
+                    // own. The escape hatch must never be the thing that scrolls away,
+                    // so it is pinned below and only the content above it scrolls.
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            VStack(alignment: .leading, spacing: Metrics.space1) {
+                                Text("YOUR NEXT MEAL")
+                                    .font(AppFont.microLabel)
+                                    .tracking(Metrics.microTracking)
+                                    .foregroundColor(Color.text2)
+                                    .fixedSize(horizontal: false, vertical: true)
 
-                        Text("Finding your\nkind of place.")
-                            .font(AppFont.screenQuestion)
-                            .foregroundColor(Color.text)
-                            .lineSpacing(2)
-                            .fixedSize(horizontal: false, vertical: true)
+                                Text("Finding your\nkind of place.")
+                                    .font(AppFont.screenQuestion)
+                                    .foregroundColor(Color.text)
+                                    .lineSpacing(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, Metrics.space3)
+
+                            // The Ticket Container with the Lottie nearby search animation
+                            ticketCard(columnWidth: column)
+                                .padding(.top, Metrics.space4)
+                                .padding(.bottom, Metrics.space3)
+                        }
+                        .padding(.horizontal, Metrics.margin)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, Metrics.space3)
-
-                    Spacer(minLength: Metrics.space2)
-
-                    // The Ticket Container with the Lottie nearby search animation
-                    ticketCard(columnWidth: column)
-
-                    Spacer(minLength: Metrics.space2)
 
                     VStack(spacing: Metrics.space3) {
+                        // Capped at the largest *standard* size: this is a reassurance
+                        // note, not content to act on, and at accessibility sizes it
+                        // would otherwise take more of the screen than the animation
+                        // it is reassuring the user about.
                         Text("This can take up to 15 seconds.")
                             .font(AppFont.note)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                             .foregroundColor(Color.text2)
                             .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .opacity(showWaitNote ? 1 : 0)
                             .animation(.easeIn(duration: 0.2), value: showWaitNote)
                             .accessibilityHidden(!showWaitNote)
@@ -78,8 +97,8 @@ struct SearchingView: View {
                         )
                     }
                     .padding(.top, Metrics.space3)
+                    .padding(.horizontal, Metrics.margin)
                 }
-                .padding(.horizontal, Metrics.margin)
                 .padding(.bottom, Metrics.space5)
                 .frame(width: geo.size.width)
             }

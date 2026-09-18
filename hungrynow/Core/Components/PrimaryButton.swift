@@ -43,8 +43,14 @@ struct PrimaryButton: View {
                 Text(title)
                     .font(AppFont.controlLabel)
                     .foregroundColor(Color.onHero)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .lineLimit(2)
+                    // 0.85 was not enough headroom: at the largest accessibility text
+                    // sizes "Directions" truncated to "Directi...", which is a primary
+                    // action the user can no longer read. Allow a second line and a
+                    // deeper scale before ever clipping a control's own label.
+                    .minimumScaleFactor(0.6)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if let trailingGlyph {
                     Spacer()
