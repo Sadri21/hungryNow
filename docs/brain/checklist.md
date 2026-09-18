@@ -35,7 +35,7 @@ Full reasoning for every line here and in "SwiftUI build — open items" below l
 **Edge-case views** (none built yet)
 - [x] Screen 07 (permission denied) — resolved: `WelcomeView.onContinue` passes `CLAuthorizationStatus` driving `RootView.Route.locationDenied`.
 - [x] Screens 08 (no results) / 09 (network error — two copy variants via `NWPathMonitor`, offline vs service-unavailable).
-- [x] Decide the `daily_limit_reached` state — **done 2026-09-17.** Now its own `NetworkErrorVariant.dailyLimitReached` ("THAT'S TODAY'S LOT" / "Back tomorrow.") with `isRetryable == false`, so the "Try again" button is omitted rather than disabled. Previously borrowed `.serviceUnavailable`, which told the user a spent daily quota was temporary and offered a button that could not succeed.
+- [x] Decide the `daily_limit_reached` state — **done 2026-09-17, rendered and verified on device 2026-09-18.** Now its own `NetworkErrorVariant.dailyLimitReached` ("THAT'S TODAY'S LOT" / "Back tomorrow.") with `isRetryable == false`, so the "Try again" button is omitted rather than disabled. Previously borrowed `.serviceUnavailable`, which told the user a spent daily quota was temporary and offered a button that could not succeed.
 - [x] All three built as native SwiftUI views (`LocationOffView`, `NoResultsView`, `NetworkErrorView`) reusing `AppBar`, `PrimaryButton`, `AppGlyphs`, asset 1x/2x/3x illustrations.
 
 **Animation**

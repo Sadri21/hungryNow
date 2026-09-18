@@ -225,3 +225,15 @@ The frozen Lottie is the point, not a defect — a looping radar sweep is contin
 **The accessibility pass is now complete** — SE layout, Dynamic Type, and Reduce Motion all verified on the oldest supported OS. It found two genuine ship-blockers that reading code did not: every glyph invisible on iOS 16, and Cancel unreachable on screen 05 at accessibility text sizes. Both were invisible on the development device at default settings.
 
 Still unverified by running: the accessibility inspector sweep (VoiceOver labels), and `daily_limit_reached`, whose screen has never actually rendered.
+
+## 2026-09-18 — `daily_limit_reached` rendered and verified
+
+The screen had never actually been seen — the fix was correct by inspection and compiled, but nothing had exercised it. Triggered it without spending any quota by writing `usage_counters/2026-09-18` with `count: 30` directly in Firestore, then requesting an uncached location (Singapore). The cap is checked before any Places or Gemini call, so the whole test costs nothing.
+
+Confirmed at both layers: the function returns HTTP 429 `{"error":"daily_limit_reached"}`, and the app renders "THAT'S TODAY'S LOT" / "Back tomorrow." with **only "Back to Home"** — no "Try again". That absence is the fix. Previously this state borrowed `.serviceUnavailable` and offered a retry button for a counter that does not reset until midnight.
+
+Incidental finding worth knowing: **no `2026-09-18` counter document existed before the test**, meaning every request today was a location-cache hit and zero Places quota was spent. The caching is doing what it was built to do.
+
+**Left open deliberately:** the screen reuses the network-error illustration, a crossed-out WiFi symbol, because `dailyLimitReached` is a `NetworkErrorVariant`. It reads as "connection problem" when the connection is fine. Cosmetic rather than wrong, and a dedicated illustration is the fix if it ever matters.
+
+**Method note:** editing the Firestore counter is the cheap way to test a quota path — no code change, no redeploy, no test value left in production. The only trap is that the counter is reached solely on a cache miss, so the test location must be one that has never been queried.
