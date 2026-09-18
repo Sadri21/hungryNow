@@ -573,7 +573,7 @@ Mockup page's inline `<symbol>` paths synced to the new SVGs — **that sync is 
 
 - **2026-09-09** — **Screen 06 (hero result) ported to SwiftUI. Everything except the status-bar detector, and the screen's primary action is dead until the backend passthrough lands.**
 
-  `Features/Recommendation/Views/ResultView.swift`, plus five shared pieces that other screens already need: `FactRow` (`.fact-row`, and screen 08 reuses it), `FactFormatter`, `AsymmetricRoundedRectangle`, `DirectionsLink`, and three new glyph families in `AppGlyphs.swift`. `HeroCardView`, `SpecialtyRowView` and `HungryButtonView` — the last of the Xcode-template placeholders — are gone.
+  `Features/Recommendation/Views/ResultView.swift`, plus five shared pieces that other screens already need: `FactRow` (`.fact-row`, and screen 08 reuses it — **no longer true: removed 2026-09-18, see `log.md`**), `FactFormatter`, `AsymmetricRoundedRectangle`, `DirectionsLink`, and three new glyph families in `AppGlyphs.swift`. `HeroCardView`, `SpecialtyRowView` and `HungryButtonView` — the last of the Xcode-template placeholders — are gone.
 
   Built: full-bleed media running to y=0 with the sheet overlapping 36, the 40px opaque band with its 14/28 corners, page dots, the eyebrow row, name, fact row, the 3-line reason clamp with inline More/Less, the per-slide photo credit, the specialty list with `origin-tag` glyphs, and the one-row pinned footer with Directions and the icon-only "Try another".
 

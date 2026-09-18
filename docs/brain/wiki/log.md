@@ -247,3 +247,21 @@ Added `firebase/functions/test_main.py` — 26 cases over the pure decision logi
 **The bug the tests found, on first run.** `_find_matching_candidate` matched names and addresses by substring and returned the **first** hit while scanning in list order. Any name contained in another mis-resolved: "Warung Nasi Padang" matches inside "Warung Nasi Padang Sederhana", so whichever sat earlier in the candidate list won regardless of which the model meant. The user would get one restaurant's name with another's coordinates and Directions. Now the **longest** match wins, ties keeping list order.
 
 Worth noting this became more load-bearing today: the prompt now carries an integer `id` instead of a photoRef, and while the id branch is checked first, these substring fallbacks are what catch a model that omits or mangles it.
+
+## 2026-09-18 — Real price ranges, and the placeholder facts they exposed
+
+A Singapore restaurant showed **"Rp50k–150k"**. The currency was wrong and the numbers were never Google's: `priceLevel` is a bare 1-4 ordinal carrying no amounts and no currency, and the client mapped it onto rupiah bands hardcoded for Jakarta — with a scrape of the model's prose as fallback and `"Rp50k–150k"` as a final default. Every path invented money, and the default fired for places with no price data at all, so "no information" and "mid-range" rendered identically.
+
+Places (New) returns **`priceRange`**: reported per-person spend with a currency code, correct in any country. Adding `places.priceRange` to the field mask cost nothing — `rating` and `priceLevel` already place the call in the Enterprise tier, the same free-ride that made photo attribution free (see 2026-09-17). Two shape traps: `units` arrives as a **string**, and `endPrice` is **absent** for open-ended ranges like "IDR250000-".
+
+The cache staleness guard — the lesson from the attribution bug, applied without being re-learned this time — keys on the **key's presence, not its value**. Roughly 4 in 10 places genuinely have no `priceRange` (hotels, in the sample), so a value check would refresh those locations on every request forever.
+
+Precedence is real range → `$$` tier → **omit the column**. Note this reverses the mockup-era decision recorded in `checklist.md` that `$$` should read `Rp Rp`: that reasoning was right when the tier was the only source and the market was Indonesia, but a currency-neutral ordinal can't be labelled with *any* currency once the app runs abroad. `$$` is now a tier glyph, not a price, and never appears when a real amount exists.
+
+**What this exposed.** Auditing for other hardcoded money found the same pattern in distance and rating: a pick with no rating rendered **"4.9" from "1.5K reviews"**, one with no location fix rendered "100 m", and an empty array rendered all three from `displayFacts`. Attached to a named real business, an invented review count is a claim about that business, and nothing on screen marked it as a placeholder. All now omit their column; the card hides entirely when nothing is known.
+
+**A latent bug that omission would have shipped:** the star glyph was drawn at `index == 1`, which identified the rating only while all three facts were always present. Drop distance and rating moves to index 0 — the star lands on the **price**. Fixed by moving the flag onto `Fact.showsStar`, which had to land *before* the facts became conditional.
+
+**`FactRow` removed** — no call sites. `log-archive.md` records screen 08 reusing it, true when written; `ResultSpecialtiesSection` has since styled its facts inline. `Fact` lived in the same file and is very much in use, so the view went and the file became `Fact.swift`. Third instance this month of a doc line that was accurate when written and silently expired — the CLAUDE.md rule about verifying before trusting a description keeps earning its place.
+
+**Method note:** committed as three separate commits, each **built in isolation before being made**, not just the final tree. Two files carried changes belonging to different concerns, so the intermediate states were reconstructed by hand rather than split by hunk. The point is that any of the three can be checked out and compiles — `git bisect` won't land on a broken commit in a repo that is now public.
