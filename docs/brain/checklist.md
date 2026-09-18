@@ -2,16 +2,18 @@
 
 ## Next up — decided 2026-09-17
 
-The app is functionally complete end to end: 49 Swift files, all nine screens ported, backend filtering by opening hours, full field passthrough. What remains is compliance, verification, and shipping-hygiene — not features.
+The app is functionally complete end to end: 49 Swift files, all nine screens ported, backend filtering by opening hours, full field passthrough. 
+
+**MVP complete as of 2026-09-18** — all five ship-blockers below are closed. The app runs correctly on the oldest supported OS, the repo is public, and the compliance blocker (photo attribution) is verified on device. Everything still unchecked further down is polish, mockup-side CSS, or icon work; none of it blocks a portfolio release or a sale. The one quality gap worth closing before a buyer looks: the VoiceOver-label sweep with the inspector open.
 
 1. ~~**Photo attribution (compliance blocker)**~~ — **DONE and verified on device 2026-09-17.** Credit renders under the hero photo as "Photo by <name>". Root cause of the long debug: a missing cache-staleness guard, now added. See log.
 2. ~~**Replace screen 06 slide 2**~~ — **resolved, no work needed.** The watermarked foodpanda placeholder exists only in `output/mockups/archive-before-2026-09-10/`; the Sept 10 redesign dropped it, and it was never in the app (the real carousel fetches Places photos via `get_photo`). Verified 2026-09-17.
-3. **`git init` the Xcode project.** Still not a repo (verified 2026-09-17). 49 Swift files with zero version history is the largest unmanaged risk on the project right now; this needs an interactive terminal.
+3. ~~**`git init` the Xcode project.**~~ — **DONE 2026-09-17/18.** The repo is public at `github.com/Sadri21/hungryNow` with README, screenshots and LICENSE. Office identity rewritten out of the author metadata with `git filter-branch` (tree verified byte-identical). The "largest unmanaged risk" is closed.
 4. ~~**`LSApplicationQueriesSchemes`**~~ — **not a blocker; nothing is broken.** Verified 2026-09-17: `DirectionsLink` builds `https://` universal links for both Apple Maps and Google Maps and never calls `canOpenURL`, so there is nothing to fail silently. The plist entry is only needed if a nav-app *chooser* is added — see the open item below, which is a product decision, not a fix.
-5. **Verification pass** — SE + Dynamic Type slider, Reduce Motion end to end, accessibility inspector. All three are written as done "by reading the code," never actually run on a device.
+5. ~~**Verification pass**~~ — **DONE 2026-09-18**, all three on iPhone SE (3rd gen) / iOS 16.4, the oldest supported OS. SE layout walked to Place Details; Dynamic Type at the largest accessibility size; Reduce Motion end to end (crossfade degrades, navigation unaffected, Lottie freezes on a static frame). Running it found two ship-blockers that reading the code had not: all 20 glyphs blank on iOS 16 (`currentColor`), and Cancel unreachable on screen 05. **The accessibility *inspector* / VoiceOver-label sweep is a separate item** — see "Accessibility sweep" below — and is still unrun.
 6. **Then polish and demo** — visual polish pass, 2-3 simulated locations, the 20-40s Dark-appearance recording.
 
-Deliberately *not* next: the screen-05 CSS ring/contrast fixes and the icon-composer work. They are mockup-side and cosmetic; items 1-4 are ship-blockers.
+Deliberately *not* next: the screen-05 CSS ring/contrast fixes and the icon-composer work. They are mockup-side and cosmetic; items 1-5 were the ship-blockers, and all five are now closed.
 
 ## HTML redesign review — 2026-09-11
 
@@ -126,6 +128,13 @@ They are not dropped — they are the same work, moved to where it can actually 
 - [x] **Screen 05's radar sizing — resolved 2026-09-09.** `RadarView` takes its side from the caller as `min(m.px(200), column)`, and `SearchingView` computes `column` from the real screen width. So it is a fraction of available width AND clamped, which matters because `m.px(200)` is genuinely wider than the padded column on every device (324.8pt of radar against 321.5pt of column on a 393pt screen) — the 2px overflow was not only a fixed-frame artifact, it reproduces at every scale. The dashed outer ring cannot be clipped: the generator draws it at r=99 inside a 200-unit box, and `scaleAspectFit` letterboxes rather than crops. **Still worth a look on an SE**, for the composition rather than the clipping
 
 ## After the MVP works
+
+**The gate is open as of 2026-09-18** — the MVP is done and this section is now the active work, not the future one.
+
+**These four lines predate the app and three of them no longer match decisions since made. Review before acting:**
+- The gigs say "Android/iOS", but `ios-vs-android.md` decided to **lead with iOS** — recorded there as "a standing positioning decision across clients, not project-specific".
+- "Office app as portfolio proof" conflicts with removing the office identity from this repo on 2026-09-18. Andika is the office; this is personal work. Using the office app reopens exactly what that cleanup closed.
+- "Add an AI chatbot to your existing app" does not describe what was actually built. HungryNow is a full iOS app with a cost-controlled AI backend, two-layer caching, quota walls and a documented vault. `ai-scalable-pitch.md` already carries the sharper offer — the **"AI-Ready Codebase"** add-on, with this vault as the demonstration — and postdates these lines.
 
 - [ ] Create Fiverr seller profile ("Become a Seller")
 - [ ] Publish gig(s): "Add an AI chatbot to your existing app" + "Integrate ChatGPT/AI features into your Android/iOS app"
