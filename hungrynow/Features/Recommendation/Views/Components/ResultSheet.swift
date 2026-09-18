@@ -40,8 +40,11 @@ struct ResultSheet: View {
                 .foregroundColor(Color.text)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // Facts card
-            ResultFactsCard(facts: facts)
+            // Facts card — omitted entirely when nothing is known, since the card is
+            // only a frame around its columns and an empty one reads as a loading bar.
+            if !facts.isEmpty {
+                ResultFactsCard(facts: facts)
+            }
 
             // Permanently visible reason block
             reasonBlock

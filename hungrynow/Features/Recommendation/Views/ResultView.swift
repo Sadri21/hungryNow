@@ -276,8 +276,8 @@ struct ResultView: View {
         onHome: {},
         facts: [
             Fact(label: "away", value: "400 m"),
-            Fact(label: "1.5K reviews", value: "4.9"),
-            Fact(label: "per person", value: "Rp50k–150k")
+            Fact(label: "1.5K reviews", value: "4.9", showsStar: true),
+            Fact(label: "per person", value: "IDR 50,000–75,000")
         ]
     )
     .preferredColorScheme(.light)

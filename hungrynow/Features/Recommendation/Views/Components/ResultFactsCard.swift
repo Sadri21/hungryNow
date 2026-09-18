@@ -11,27 +11,16 @@ import SwiftUI
 struct ResultFactsCard: View {
     let facts: [Fact]
 
-    private var displayFacts: [Fact] {
-        if !facts.isEmpty {
-            return facts
-        }
-        return [
-            Fact(label: "away", value: "400 m"),
-            Fact(label: "1.5K reviews", value: "4.9"),
-            Fact(label: "per person", value: "Rp50k–150k")
-        ]
-    }
-
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            ForEach(Array(displayFacts.enumerated()), id: \.offset) { index, fact in
+            ForEach(Array(facts.enumerated()), id: \.offset) { index, fact in
                 if index > 0 {
                     Color.hairline
                         .frame(width: 1, height: 38)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    if index == 1 {
+                    if fact.showsStar {
                         HStack(spacing: 5) {
                             AppGlyph.starFill.image(size: 16, color: Color.heroText)
                             Text(fact.value)

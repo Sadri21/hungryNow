@@ -136,16 +136,18 @@ final class RecommendationViewModel: ObservableObject {
 
     /// The hero's fact row: distance, rating, price per person, matching Screen 06.
     func heroFacts(for hero: HeroPick) -> [Fact] {
+        // Every fact here is omitted when its data is missing, never defaulted.
+        //
+        // The card used to fill gaps with plausible-looking constants — "100 m", and a
+        // rating of "4.9" from "1.5K reviews". Attached to a named real restaurant that
+        // is an invented review count, and nothing on screen marks it as a placeholder.
+        // A shorter card is honest; a complete one that is partly fiction is not.
+
         // 1. Distance (away)
-        let distanceText: String
-        if let metres = distance(to: hero) {
-            distanceText = FactFormatter.distance(metres: metres)
-        } else {
-            distanceText = "100 m"
-        }
+        let distanceText: String? = distance(to: hero).map { FactFormatter.distance(metres: $0) }
 
         // 2. Rating (rating)
-        let ratingValue: String
+        let ratingValue: String?
         let ratingLabel: String
         if let rating = hero.rating {
             ratingValue = FactFormatter.ratingValue(rating)
@@ -158,8 +160,8 @@ final class RecommendationViewModel: ObservableObject {
             ratingValue = parsed
             ratingLabel = "rating"
         } else {
-            ratingValue = "4.9"
-            ratingLabel = "1.5K reviews"
+            ratingValue = nil
+            ratingLabel = "rating"
         }
 
         // 3. Price (per person)
@@ -171,10 +173,13 @@ final class RecommendationViewModel: ObservableObject {
         // one with a known tier, in rupiah regardless of country.
         let priceText = FactFormatter.price(range: hero.priceRange, level: hero.priceLevel)
 
-        var facts = [
-            Fact(label: "away", value: distanceText),
-            Fact(label: ratingLabel, value: ratingValue)
-        ]
+        var facts: [Fact] = []
+        if let distanceText {
+            facts.append(Fact(label: "away", value: distanceText))
+        }
+        if let ratingValue {
+            facts.append(Fact(label: ratingLabel, value: ratingValue, showsStar: true))
+        }
         if let priceText {
             facts.append(Fact(label: "per person", value: priceText))
         }

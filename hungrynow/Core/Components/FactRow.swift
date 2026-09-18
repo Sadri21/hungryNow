@@ -16,6 +16,14 @@ struct Fact: Identifiable {
     let label: String
     let value: String
 
+    /// Draws the star glyph beside the value. Belongs to the *rating* fact, not to a
+    /// position in the array.
+    ///
+    /// `ResultFactsCard` used to key the star off `index == 1`, which held only while
+    /// every pick had all three facts. Once a missing rating or distance can drop a
+    /// column, position stops identifying the fact: a starred price is one omission away.
+    var showsStar: Bool = false
+
     var id: String { label }
 }
 
