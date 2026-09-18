@@ -237,3 +237,13 @@ Incidental finding worth knowing: **no `2026-09-18` counter document existed bef
 **Left open deliberately:** the screen reuses the network-error illustration, a crossed-out WiFi symbol, because `dailyLimitReached` is a `NetworkErrorVariant`. It reads as "connection problem" when the connection is fine. Cosmetic rather than wrong, and a dedicated illustration is the fix if it ever matters.
 
 **Method note:** editing the Firestore counter is the cheap way to test a quota path — no code change, no redeploy, no test value left in production. The only trap is that the counter is reached solely on a cache miss, so the test location must be one that has never been queried.
+
+## 2026-09-18 — Backend tests written; they found a matcher bug immediately
+
+Added `firebase/functions/test_main.py` — 26 cases over the pure decision logic: `_is_place_open`, `_find_matching_candidate`, `_parse_price_level`. No Firebase project, no network, no credentials needed. `main.py` runs `initialize_app()` at import time, so the tests extract the functions from source rather than importing the module; that is the cost of keeping them runnable anywhere.
+
+**`_is_place_open` is testable because it takes `at_time_utc`.** Pinning the clock is the whole point — a test for "open at 19:00" that reads the real clock passes or fails depending on the hour it runs, which is exactly the flakiness this function invites. Cases cover overnight hours wrapping Sunday midnight, 24/7 (Google omits `close`), split lunch/dinner periods, the closing minute being exclusive, per-place timezone offset, malformed periods skipped rather than crashing, `periods` taking precedence over a stale cached `openNow`, and unknown hours returning `None` rather than `False` — `False` would silently drop the unlisted warungs the product exists to surface.
+
+**The bug the tests found, on first run.** `_find_matching_candidate` matched names and addresses by substring and returned the **first** hit while scanning in list order. Any name contained in another mis-resolved: "Warung Nasi Padang" matches inside "Warung Nasi Padang Sederhana", so whichever sat earlier in the candidate list won regardless of which the model meant. The user would get one restaurant's name with another's coordinates and Directions. Now the **longest** match wins, ties keeping list order.
+
+Worth noting this became more load-bearing today: the prompt now carries an integer `id` instead of a photoRef, and while the id branch is checked first, these substring fallbacks are what catch a model that omits or mangles it.

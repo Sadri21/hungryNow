@@ -541,19 +541,35 @@ def _find_matching_candidate(pick: dict, candidates: list[dict]) -> dict | None:
             if c_name == pick_name:
                 return c
 
-    # 3. Substring match by name
+    # 3. Substring match by name - LONGEST match wins, not the first found.
+    #
+    # Scanning in order and returning the first hit picks the wrong restaurant
+    # whenever one name contains another: "Warung Nasi Padang" matches inside
+    # "Warung Nasi Padang Sederhana", so whichever sits earlier in the candidate
+    # list wins regardless of which the model meant. The longest overlap is the
+    # better guess, and ties keep list order.
     if pick_name:
+        best = None
+        best_len = 0
         for c in candidates:
             c_name = (c.get("name") or "").strip().lower()
             if c_name and (c_name in pick_name or pick_name in c_name):
-                return c
+                if len(c_name) > best_len:
+                    best, best_len = c, len(c_name)
+        if best is not None:
+            return best
 
-    # 4. Match by address
+    # 4. Match by address - same rule, same reason ("Street 1" is inside "Street 11").
     if pick_address:
+        best = None
+        best_len = 0
         for c in candidates:
             c_addr = (c.get("address") or "").strip().lower()
             if c_addr and (c_addr in pick_address or pick_address in c_addr):
-                return c
+                if len(c_addr) > best_len:
+                    best, best_len = c, len(c_addr)
+        if best is not None:
+            return best
 
     return None
 
