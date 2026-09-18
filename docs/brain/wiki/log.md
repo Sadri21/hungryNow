@@ -183,3 +183,15 @@ Fixed by baking `#000000` into all 20 files. The literal never shows: the images
 **Why it was invisible until now.** Development ran on iPhone 17 Pro against a current iOS, where `currentColor` happens to work. The deployment target is 16.0, so the whole supported range below the dev device was untested. A single run on the oldest supported OS found it in minutes.
 
 **The generalisable rule, now in `AppGlyphs.swift` and the repo instructions:** SVG authored for the mockups cannot be moved into the asset catalog unchanged. `currentColor` is the specific trap, and the class is CSS-dependent constructs that have no meaning in a standalone file.
+
+## 2026-09-18 — SE pass complete
+
+Walked the full flow on iPhone SE (3rd gen) / iOS 16.4 — 375x667, and the oldest OS the deployment target claims to support. Every screen through to Place Details checked.
+
+**Layout holds.** No clipping, no controls pushed off-screen, no horizontal overflow. This was the open worry: four screens (`WelcomeView`, `SearchingView`, `ResultView`, `PlaceDetailsView`) have no `isCompact` branch, unlike the other four, and `ResultView` in particular stacks a 260pt photo header, facts card, reason and specialties onto a screen 185pt shorter than the dev device. It survives — the scroll view absorbs it, and the pinned Directions footer stays clear.
+
+**Screen 05's predicted radar overflow did not reproduce.** The vault flagged `m.px(200)` as wider than the padded column at every scale (324.8pt against 321.5pt on a 393pt screen); on the SE the illustration card sits inside its margins with the dashed edge intact. The clamp is doing its job.
+
+**The pass paid for itself** by finding the blank-glyph bug on its first screen — see the entry above. Worth stating plainly: that bug was found by running the app on an old device, not by reading code, and nothing in the test suite or a build would have surfaced it.
+
+**Still not done: the Dynamic Type slider**, and Reduce Motion end to end. Both are behaviour rather than layout, and both remain marked done "by reading the code".

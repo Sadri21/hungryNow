@@ -185,7 +185,8 @@ can read the reasoning next to the code it explains. Start at
 
 ## Status
 
-Functionally complete and deployed; all nine screens built. Remaining work is
+Functionally complete and deployed; all nine screens built. Tested on iPhone SE
+(iOS 16.4, the oldest supported OS) through iPhone 17 Pro. Remaining work is
 verification and polish — see the checklist. Built by
 [Sadri Ashari](https://github.com/Sadri21) under the **Revaiter** brand.
 
