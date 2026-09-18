@@ -7,7 +7,7 @@ The app is functionally complete end to end: 49 Swift files, all nine screens po
 1. ~~**Photo attribution (compliance blocker)**~~ — **DONE and verified on device 2026-09-17.** Credit renders under the hero photo as "Photo by <name>". Root cause of the long debug: a missing cache-staleness guard, now added. See log.
 2. ~~**Replace screen 06 slide 2**~~ — **resolved, no work needed.** The watermarked foodpanda placeholder exists only in `output/mockups/archive-before-2026-09-10/`; the Sept 10 redesign dropped it, and it was never in the app (the real carousel fetches Places photos via `get_photo`). Verified 2026-09-17.
 3. **`git init` the Xcode project.** Still not a repo (verified 2026-09-17). 49 Swift files with zero version history is the largest unmanaged risk on the project right now; this needs an interactive terminal.
-4. **`LSApplicationQueriesSchemes`** — no plist entry exists yet. Directions to Google Maps / Waze will fail silently until `comgooglemaps` and `waze` are added.
+4. ~~**`LSApplicationQueriesSchemes`**~~ — **not a blocker; nothing is broken.** Verified 2026-09-17: `DirectionsLink` builds `https://` universal links for both Apple Maps and Google Maps and never calls `canOpenURL`, so there is nothing to fail silently. The plist entry is only needed if a nav-app *chooser* is added — see the open item below, which is a product decision, not a fix.
 5. **Verification pass** — SE + Dynamic Type slider, Reduce Motion end to end, accessibility inspector. All three are written as done "by reading the code," never actually run on a device.
 6. **Then polish and demo** — visual polish pass, 2-3 simulated locations, the 20-40s Dark-appearance recording.
 
@@ -29,19 +29,19 @@ Full reasoning for every line here and in "SwiftUI build — open items" below l
 - [x] Backend passthrough — `latitude`, `longitude`, `placeId`, `rating`, `ratingCount`, `priceLevel`, `photoRefs` (array), `openNow` all land via `_enrich_hero` / `_enrich_specialty` in `main.py` (verified 2026-09-17). Client already models them as optional, so nothing changed on the client.
 - [x] Photo `attribution` — backend done 2026-09-17 (`_photo_attributions`, cache, `get_photo`, `_enrich_hero`). No extra Places cost: `places.photos` already carried `authorAttributions`. **Client side still open** — see below.
 - [ ] Gemini prompt: keep numbers out of `reason` (it currently restates the fact row and truncates).
-- [ ] Add `comgooglemaps` / `waze` to `LSApplicationQueriesSchemes` before wiring Directions (`canOpenURL` fails silently without it).
+- [ ] **(Decision, not a fix)** Offer a nav-app chooser (Apple Maps / Google Maps / Waze)? Only then are `comgooglemaps` + `waze` needed in `LSApplicationQueriesSchemes`, since `canOpenURL` reports every undeclared scheme as missing. **Recommendation: don't.** Directions already works everywhere via `https://` universal links, and a picker contradicts the one-button, no-decisions premise for a hungry tourist. Close this as "won't do" unless Sadri wants the choice.
 - [ ] Settle 04 → 06 navigation — also closes screen 06's missing back affordance. See [[architecture]] → "Navigation: flat replacement now, one stack later".
 
 **Edge-case views** (none built yet)
 - [x] Screen 07 (permission denied) — resolved: `WelcomeView.onContinue` passes `CLAuthorizationStatus` driving `RootView.Route.locationDenied`.
 - [x] Screens 08 (no results) / 09 (network error — two copy variants via `NWPathMonitor`, offline vs service-unavailable).
-- [ ] Decide the `daily_limit_reached` state (can't share screen 09's "Try again").
+- [x] Decide the `daily_limit_reached` state — **done 2026-09-17.** Now its own `NetworkErrorVariant.dailyLimitReached` ("THAT'S TODAY'S LOT" / "Back tomorrow.") with `isRetryable == false`, so the "Try again" button is omitted rather than disabled. Previously borrowed `.serviceUnavailable`, which told the user a spent daily quota was temporary and offered a button that could not succeed.
 - [x] All three built as native SwiftUI views (`LocationOffView`, `NoResultsView`, `NetworkErrorView`) reusing `AppBar`, `PrimaryButton`, `AppGlyphs`, asset 1x/2x/3x illustrations.
 
 **Animation**
-- [ ] Screen transitions — `withAnimation` + `.transition()` (not a nav stack, unless the item above lands one).
+- [x] Screen transitions — **built.** `Core/ScreenTransition.swift` provides the asymmetric scale-and-fade (0.28s, inside the vault's motion window); `RootView` and `RecommendationView` apply it via `withAnimation` + `.transition()`. Verified 2026-09-17.
 - [x] Status-bar luminance detector for screen 06 (`UIHostingController` subclass — SwiftUI can't set `preferredStatusBarStyle` directly). 4 known naive-version bugs written out in `screen-06-result.html`.
-- [ ] Verify Reduce Motion end to end (radar parks on frame 172, screen 05's stage dot stops pulsing — never actually tested with the setting on).
+- [ ] Verify Reduce Motion **on a device** — the code path is wired everywhere (`@Environment(\.accessibilityReduceMotion)` in `RootView`, `RecommendationView`, `SearchingView`, `PlaceDetailsView`; transitions degrade to a plain crossfade). What is untested is the behaviour with the setting actually on: radar parking on frame 172 and the stage dot ceasing to pulse.
 
 **Before any of the above:** run the sizing migration on an SE + walk the Dynamic Type slider — only verified on one device so far.
 
@@ -60,12 +60,12 @@ Screens 02/04/05/06 are ported; backend, edge cases, icon, and polish remain. Co
 - [ ] Check the licence position on permanently re-hosting Places photos (365-day WebP copies in Firebase Storage).
 - [ ] Document the screen-06 ambiguous-photo status-bar case as an accepted limitation (bright signage on night sky can fail both bar styles — no fix planned, scrim is banned).
 - [ ] Screen 05: fix the CSS ring animation to match the Lottie (rings currently scale-cap under the centre badge and are invisible — `.ring` tops out at 52px inside the 46px badge).
-- [ ] Screen 05: fix `.stage.next{opacity:.5}` — same contrast-bug class as the photo-credit item below (~2.4:1 on 12px text).
-- [ ] Screen 06: fix `.photo-credit` opacity contrast (third instance of the same bug class). **Now applies to the shipped native view too** — `ResultSheet`'s credit line is `Color.text2` fineprint.
-- [ ] Decide the credit line's **placement**: it currently sits at the bottom of the "Why this place" block, not on or under the photo it credits. Compliant but easy to miss, and it reads as part of the reason copy.
+- [x] Screen 05 `.stage.next{opacity:.5}` — **gone with the Sept 10 redesign.** Verified 2026-09-17: the selector exists nowhere in the current mockups.
+- [x] Screen 06 `.photo-credit` opacity contrast — **not a live bug.** Verified 2026-09-17: `.photo-credit` survives only in `output/mockups/archive-before-2026-09-10/`. And the native credit line does NOT inherit the problem: `Color.text2` on `Color.bg` measures **6.12:1 light / 8.28:1 dark**, well past WCAG AA's 4.5:1 for small text. The bug was CSS `opacity`, which the native view never used.
+- [x] Credit line placement — **settled: it stays where it is.** Moving it onto the photo would break `app-mockups.md` decision #1 ("No text over the photo", marked not-to-re-litigate): legible text on a photo needs a scrim, scrims are banned gradients, and no fixed overlay colour survives the range of Places photos (lit facade / dark interior / white tablecloth). Below the photo in the sheet is the only compliant spot. "Photo by <name>" now labels it so it doesn't read as stray copy.
 - [ ] Decide who owns screen 05's motion spec (CSS vs the Lottie generator script) — they've already diverged in 3 places.
 - [ ] Screen 05 currently shows 2 stages, not 3 (API contract carries no candidate count) — Sadri's call whether a backend progress signal is worth adding for a third stage.
-- [ ] Consolidate `AsymmetricRoundedRectangle` and `WelcomeView.PurposeCardShape` (two corner implementations) — note this visibly changes screen 02's curvature, needs a look before merging.
+- [ ] Consolidate `AsymmetricRoundedRectangle` and `WelcomeView.PurposeCardShape` — **confirmed still duplicated 2026-09-17**; `AsymmetricRoundedRectangle.swift:20` documents it in the file itself. Changes screen 02's curvature visibly, so look before merging.
 - [ ] One icon set, two representations (screen 05 Lottie-baked pins vs screen 06 `FoodGlyph` Swift paths) — drive both from one source, or explicitly accept the duplication.
 - [ ] Re-read screen 02's "Location, only on tap" copy — still true, but a fix is now taken right after permission is granted, not only on the recommendation tap.
 - [ ] Reword `visual-identity.md`'s "colour alone signals" line to "colour reinforces, alongside symbol fill weight and placement".
@@ -77,8 +77,8 @@ Screens 02/04/05/06 are ported; backend, edge cases, icon, and polish remain. Co
 - [ ] Keep using `convert` (ImageMagick) to render icon SVG candidates instead of waiting on a browser — caught 6 of 9 candidate failures that weren't visible in the arithmetic.
 
 **Housekeeping**
-- [ ] `git init` the Xcode project (`hungrynow/`) — needs an interactive terminal or that folder connected; not doable from this Cowork session.
-- [ ] Decide where the mockups live for version control (`output/mockups/` isn't covered by the project repo; screen 06 alone was rewritten 8 times with only comments as history).
+- [x] `git init` the Xcode project — **done 2026-09-17.** Initial commit `796a8d0` pushed to https://github.com/Sadri21/hungryNow (public). Secrets, venv, and `CLAUDE.local.md` gitignored and verified excluded.
+- [x] Decide where the mockups live for version control — **resolved by the vault move.** They are at `docs/brain/output/mockups/` inside the repo, 61 files now tracked in git, so every future rewrite has real history.
 - [ ] Build a self-contained mockup page (CSS inlined, images as data URIs) — the mockups currently can't be previewed except by opening from Finder; this is why several sessions in a row logged unrendered screens.
 - [ ] Render pass on screens 02, 03, 08 — all changed since last actually viewed.
 - [ ] Screen 02 dark-appearance pass (aubergine motif line art → blush in dark).

@@ -146,6 +146,7 @@ struct RecommendationView: View {
             case .noResults: return "noResults"
             case .networkError(.offline): return "networkError.offline"
             case .networkError(.serviceUnavailable): return "networkError.serviceUnavailable"
+            case .networkError(.dailyLimitReached): return "networkError.dailyLimitReached"
             }
         }
 

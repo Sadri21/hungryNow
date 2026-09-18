@@ -38,6 +38,16 @@ GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]
 # timeout = 40s worst case, plus backoff and the Places call.
 MAX_ATTEMPTS_PER_MODEL = 2
 
+# Hard ceiling on what one call can generate. The response is 1 hero + 2-3
+# specialties, each a handful of short fields, which measures well under 1k
+# tokens - 2048 is roughly double the worst realistic case, so it bounds a
+# runaway generation without ever truncating a legitimate answer.
+#
+# NOTE: this caps cost PER CALL. It does not keep the project on the free
+# tier - free vs pay-as-you-go is decided by whether billing is enabled on
+# the API key's Google Cloud project, not by request size.
+GEMINI_MAX_OUTPUT_TOKENS = 2048
+
 # Cost control: caps concurrent containers for this function. Must be set
 # before any @https_fn.on_request decorator runs (Python evaluates
 # decorators at module load time, so this needs to come first).
@@ -225,7 +235,7 @@ RESPONSE_SCHEMA = {
                 "reason": {"type": "string"},
                 "description": {"type": "string"},
                 "foodCategory": {"type": "string"},
-                "photoRef": {"type": "string", "nullable": True},
+                "id": {"type": "integer", "nullable": True},
             },
             "required": ["name", "address", "reason", "description", "foodCategory"],
         },
@@ -242,6 +252,7 @@ RESPONSE_SCHEMA = {
                     "reason": {"type": "string"},
                     "description": {"type": "string"},
                     "foodCategory": {"type": "string"},
+                    "id": {"type": "integer", "nullable": True},
                 },
                 "required": ["name", "address", "reason", "description", "foodCategory"],
             },
@@ -403,11 +414,19 @@ def _is_place_open(candidate: dict, at_time_utc: datetime.datetime | None = None
 def _pick_recommendations(candidates: list[dict], gemini_key: str) -> dict:
     client = genai.Client(api_key=gemini_key)
 
-    # Sanitize candidates to keep prompt concise and eliminate bulky periods arrays
+    # Sanitize candidates to keep the prompt concise: drop the bulky periods arrays,
+    # and send a short integer `id` in place of the photoRef.
+    #
+    # A photoRef is ~240 characters of opaque Google identifier - across 20 candidates
+    # that was ~1,200 tokens, roughly 43% of the prompt, spent on a string the model
+    # cannot reason about and only ever copies back verbatim. An index does the same
+    # job in 1-2 characters. `_find_matching_candidate` resolves the pick back to its
+    # candidate (and therefore its real photoRef) by id first, then name/address.
     gemini_candidates = []
-    for c in candidates:
+    for idx, c in enumerate(candidates):
         is_open = _is_place_open(c)
         gemini_candidates.append({
+            "id": idx,
             "name": c.get("name"),
             "address": c.get("address"),
             "rating": c.get("rating"),
@@ -415,7 +434,6 @@ def _pick_recommendations(candidates: list[dict], gemini_key: str) -> dict:
             "priceLevel": c.get("priceLevel"),
             "type": c.get("type"),
             "phone": c.get("phone"),
-            "photoRef": c.get("photoRef"),
             "isOpenNow": is_open if is_open is not None else "unknown",
         })
 
@@ -440,9 +458,9 @@ def _pick_recommendations(candidates: list[dict], gemini_key: str) -> dict:
         "the candidate data if present, or output null if the candidate has no phone number "
         "- never invent a phone number. For every pick (hero and each specialty), also set "
         "'foodCategory' to the one specific dish/cuisine it specializes in (e.g. 'Ramen', "
-        "'Sushi', 'Takoyaki') - short, 1-3 words. Copy the 'photoRef' field verbatim from "
-        "the candidate data onto the hero pick only if present, or output null if the "
-        "hero's candidate has no photoRef - never invent one.\n\n"
+        "'Sushi', 'Takoyaki') - short, 1-3 words. For every pick (hero and each specialty), "
+        "set 'id' to the integer 'id' of the candidate you chose, copied exactly from the "
+        "candidate data - never invent an id and never reuse one.\n\n"
         f"Candidates:\n{json.dumps(gemini_candidates, ensure_ascii=False)}"
     )
 
@@ -457,9 +475,20 @@ def _pick_recommendations(candidates: list[dict], gemini_key: str) -> dict:
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         response_schema=RESPONSE_SCHEMA,
+                        max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS,
                         http_options=types.HttpOptions(timeout=GEMINI_TIMEOUT_MS),
                     ),
                 )
+                # Log real usage so prompt growth is visible in Cloud Logging rather
+                # than guessed at. `usage_metadata` is the authoritative count.
+                usage = getattr(response, "usage_metadata", None)
+                if usage is not None:
+                    logger.info(
+                        f"gemini_usage model={model} "
+                        f"prompt={getattr(usage, 'prompt_token_count', '?')} "
+                        f"output={getattr(usage, 'candidates_token_count', '?')} "
+                        f"total={getattr(usage, 'total_token_count', '?')}"
+                    )
                 return json.loads(response.text)
             except genai_errors.ClientError as e:
                 # 429 means today's quota for THIS model is gone - retrying
@@ -487,6 +516,14 @@ def _pick_recommendations(candidates: list[dict], gemini_key: str) -> dict:
 
 
 def _find_matching_candidate(pick: dict, candidates: list[dict]) -> dict | None:
+    # 0. Match by the integer id the model was given. Unambiguous when present, and the
+    #    reason photoRefs no longer need to travel through the prompt at all. Guarded
+    #    rather than trusted: the model can still emit an out-of-range or non-integer id,
+    #    in which case we fall through to the name/address matching below.
+    pick_id = pick.get("id")
+    if isinstance(pick_id, int) and 0 <= pick_id < len(candidates):
+        return candidates[pick_id]
+
     pick_photo = pick.get("photoRef")
     pick_name = (pick.get("name") or "").strip().lower()
     pick_address = (pick.get("address") or "").strip().lower()

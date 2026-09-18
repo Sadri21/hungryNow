@@ -104,3 +104,70 @@ Deleted the out-of-repo copy after verifying this one held all 144 files. The br
 "Replace screen 06 slide 2 — placeholder foodpanda image, visible watermark, can't ship" has been carried as a blocker since before the Sept 10 mockup redesign. Checked it against the files rather than trusting the line: `foodpanda` appears only in `output/mockups/archive-before-2026-09-10/screen-06-result.html`, never in the current mockups and never in the app, whose carousel has always fetched real Places photos through `get_photo`. The redesign removed the problem and the checklist item outlived it.
 
 Closed as resolved-by-redesign, not fixed. Worth noting the failure mode: an item phrased as a blocker stayed on the live agenda for a week after it stopped being true, and I repeated it as a blocker several times today before checking. Items that describe a *file* should be verified against that file before being restated.
+
+## 2026-09-17 — `LSApplicationQueriesSchemes` was never a blocker
+
+Checked `DirectionsLink.swift` after listing this as a ship-blocker several times. It isn't one: both `appleMaps` and `googleMapsPlace` return `https://` universal links (`maps.apple.com`, `google.com/maps/search/`), and nothing in the codebase calls `canOpenURL`. There is no silent failure because there is no scheme query. The file already documents this at its "Apple Maps only, for now" note.
+
+The plist entry is a **prerequisite for an unbuilt feature** — a nav-app chooser — not a fix for existing behaviour. Reframed on the checklist as a product decision, with a recommendation against it: a picker contradicts the one-button premise, and universal links already work on every device with zero configuration.
+
+Third stale ship-blocker found today (after the foodpanda placeholder and the backend passthrough). All three shared a shape: a checklist line written when it was true, restated later without re-reading the code. The remaining items deserve the same skepticism.
+
+## 2026-09-17 — Checklist audited against the code
+
+After three stale ship-blockers surfaced in one day (backend passthrough, foodpanda placeholder, `LSApplicationQueriesSchemes`), audited every open item that makes a checkable claim. Six were wrong.
+
+**Done, not marked done:**
+- `git init` — completed today; commit `796a8d0` is public on GitHub.
+- Mockup version control — resolved as a side effect of moving the vault into the repo. 61 mockup files are tracked; the "screen 06 rewritten 8 times with only comments as history" problem is gone.
+- Screen transitions — `Core/ScreenTransition.swift` exists and is applied in `RootView` and `RecommendationView`. The item read as unstarted.
+
+**Overstated:**
+- Reduce Motion — described as untested end to end, implying nothing was built. The code path is wired in four views and degrades correctly; only on-device behaviour is unverified. Rewritten so the remaining work is visible without implying the feature is missing.
+- `daily_limit_reached` — described as undecided. It is in fact handled, mapped to `.networkError(.serviceUnavailable)`, which means a user who exhausts the daily quota is shown "Try again" for something that will not work until tomorrow. Worse than unhandled, because it looks finished. Reframed as a copy problem, not a plumbing one.
+
+**Confirmed still true:** the `AsymmetricRoundedRectangle` / `PurposeCardShape` duplication (the file documents it at line 20), and the `visual-identity.md` "colour *alone* signals" wording, which the page itself flags at line 205.
+
+**Pattern.** Every wrong item was written when it was true and never re-read. The checklist records intent at a moment; the code moves on. Items making a factual claim about a file should be verified against that file before being restated — restating is what makes a stale line look freshly confirmed.
+
+## 2026-09-17 — Photo-credit placement and contrast: both resolved, neither by editing code
+
+Sadri asked for the credit line's placement and contrast to be fixed. Checked both before changing anything; neither needed a fix, and the placement one would have been a mistake.
+
+- **Placement: it stays below the photo.** Moving it onto the image would break `app-mockups.md` decision #1 — "No text over the photo", explicitly marked as not to be re-litigated. The reasoning holds up: legible text over a photo needs a scrim, `visual-identity.md` bans gradients on persistent surfaces, and Places photos are whatever the uploader shot, so no fixed overlay colour survives a lit facade, a dark interior and a white-tablecloth shot alike. I had recommended moving it earlier today without checking the spec. The current position — inside the sheet, under the reason — is the compliant one, and "Photo by <name>" now labels it so it no longer reads as stray copy.
+- **Contrast: measured, and it passes.** `Color.text2` on `Color.bg` is **6.12:1 in light and 8.28:1 in dark**, against WCAG AA's 4.5:1 for small text. The native view was never part of the bug class.
+- **The two mockup contrast items are also dead.** `.photo-credit` and `.stage.next{opacity:.5}` exist only in `output/mockups/archive-before-2026-09-10/`. The Sept 10 redesign removed both; the checklist kept them for a week. The original bug was CSS `opacity`, a mechanism the native views never used, so "third/fourth instance of the same bug class" was never accurate for SwiftUI.
+
+Five stale items in one day now. The failure mode is consistent: a defect is recorded against a file, the file is later rewritten, and the item survives because nobody re-reads the file before restating it.
+
+## 2026-09-17 — `daily_limit_reached` given its own state; test suite run
+
+The audit turned this up as the one confirmed user-facing defect, and it is the kind that fires precisely when someone is evaluating the app: `DAILY_REQUEST_LIMIT` is 30, so a busy demo day reaches it.
+
+**The bug.** `RecommendationViewModel` mapped `.dailyLimitReached` onto `.networkError(.serviceUnavailable)`, so exhausting the day's quota showed "The search couldn't finish / Restaurant recommendations are temporarily unavailable. Please try again in a moment." — with a **Try again** button. Every part of that is false: the condition is not temporary, "a moment" is until midnight, and retrying cannot succeed. Worse than an unhandled state, because it looks finished.
+
+**The fix.** A real `NetworkErrorVariant.dailyLimitReached`: "THAT'S TODAY'S LOT" / "Back tomorrow." / "HungryNow serves a limited number of recommendations each day, and today's are gone. Come back tomorrow and you'll get a fresh pick." Says what happened, when it changes, and makes no apology for a designed cap.
+
+**Retry is omitted, not disabled** (`isRetryable`). A greyed-out button still reads as "this might come back in a second" — the wrong expectation for something that resets at midnight. "Back to Home" remains as the only action.
+
+**Gotcha worth remembering:** `RecommendationView.Screen.hashKey` switches exhaustively over `NetworkErrorVariant`, so adding a case breaks the build in a file that never mentions the new state. Found by grepping for other switches rather than trusting a per-file parse check. Any future variant needs the same sweep.
+
+**Tests.** Ran the suite for the first time this session: `** TEST SUCCEEDED **`, both `FactFormatter` tests pass. Worth being clear about how little that proves — two tests, both on number formatting. Nothing covers the decode path, the service layer, or `_is_place_open`, which is where today's real bugs actually were.
+
+## 2026-09-17 — Gemini prompt slimmed 45%, output capped, usage logged
+
+Sadri asked whether Gemini token usage could be limited to avoid pay-as-you-go. **Corrected the premise first:** token caps do not decide the tier. Free vs paid is set by whether billing is enabled on the API key's Google Cloud project; a small request on a billed project is still billed. Caps bound cost per call, nothing more. Recorded in the code as a comment on the constant so the assumption doesn't come back.
+
+**The real find: 43% of the prompt was photoRefs.** Each is ~240 characters of opaque Google identifier, and across 20 candidates that was ~1,200 tokens per call spent on strings the model cannot reason about — it only ever copied one back verbatim. Replaced with a short integer `id` per candidate:
+
+- prompt candidates: ~11,060 chars (~2,765 tok) → ~6,120 chars (~1,530 tok), **-45%**
+- `_find_matching_candidate` gained an id branch *before* the existing photoRef/name/address fallbacks, so the pick still resolves to its real candidate and the client sees no change
+- Response schema now carries `id` (integer, nullable) on hero and specialties instead of `photoRef`
+
+**Guarded, not trusted.** The id branch checks `isinstance(pick_id, int)` and range before indexing; an out-of-range, missing or non-integer id falls through to name/address matching exactly as before. Verified across 8 cases including `id: 0` — a plain truthiness check would have silently skipped candidate zero — and out-of-range ids.
+
+**Also added:** `max_output_tokens=2048` (roughly double the worst realistic response, so it bounds a runaway without truncating a valid answer), and `gemini_usage` logging of the real `prompt`/`output`/`total` counts from `usage_metadata`, so future prompt growth shows up in Cloud Logging instead of being estimated.
+
+Removed `GEMINI_MAX_CANDIDATES`, added in the same pass and never wired to anything.
+
+**Still open, and worth deciding separately:** Gemini is called on every request, *outside* the location-cache branch, so a cache hit spends 0 Places quota but 1 Gemini call. `DAILY_REQUEST_LIMIT` guards only the Places side — there is no cap on Gemini calls. Acceptable while the free-tier RPD is generous, but it is the uncapped surface.

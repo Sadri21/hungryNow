@@ -358,7 +358,9 @@ final class RecommendationViewModel: ObservableObject {
                 state = .noResults
                 return
             case .dailyLimitReached:
-                state = .networkError(.serviceUnavailable)
+                // Its own variant, not `.serviceUnavailable`: the quota resets tomorrow,
+                // so "Try again" would be a button that cannot succeed.
+                state = .networkError(.dailyLimitReached)
                 return
             case .network, .placesLookupFailed, .recommendationFailed, .decodingFailed, .unknown:
                 let variant: NetworkErrorVariant = networkMonitor.isConnected ? .serviceUnavailable : .offline

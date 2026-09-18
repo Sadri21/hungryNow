@@ -20,9 +20,9 @@ struct RootView: View {
     ///
     /// An enum rather than a `hasSeenWelcome` flag because the flow already has more
     /// than two states waiting: screens 07-09 (permission denied, no results, network
-    /// error) are routes, not variations of the recommendation screen, and the vault's
-    /// `daily_limit_reached` state is still undecided. Adding a case here should be the
-    /// whole cost of a new screen.
+    /// error) are routes, not variations of the recommendation screen. Adding a case here
+    /// should be the whole cost of a new screen. (`daily_limit_reached` was settled as a
+    /// `NetworkErrorVariant` rather than a route, since it reuses screen 09's layout.)
     private enum Route: Hashable {
         case welcome
         case recommendation

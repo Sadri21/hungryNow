@@ -15,12 +15,22 @@ enum NetworkErrorVariant: Equatable {
     case offline
     case serviceUnavailable
 
+    /// The daily request cap (`DAILY_REQUEST_LIMIT`) is spent.
+    ///
+    /// **Deliberately not folded into `.serviceUnavailable`.** It used to be, which meant
+    /// the screen offered "Try again" for something that cannot succeed until the counter
+    /// resets tomorrow — a button that is guaranteed to fail is worse than no button,
+    /// because it tells the reader the problem is transient when it isn't.
+    case dailyLimitReached
+
     var eyebrow: String {
         switch self {
         case .offline:
             return "THE SEARCH IS ON PAUSE"
         case .serviceUnavailable:
             return "A BRIEF INTERRUPTION"
+        case .dailyLimitReached:
+            return "THAT’S TODAY’S LOT"
         }
     }
 
@@ -30,6 +40,8 @@ enum NetworkErrorVariant: Equatable {
             return "You’re offline."
         case .serviceUnavailable:
             return "The search couldn’t finish."
+        case .dailyLimitReached:
+            return "Back tomorrow."
         }
     }
 
@@ -39,6 +51,21 @@ enum NetworkErrorVariant: Equatable {
             return "Reconnect to Wi-Fi or mobile data, then try again."
         case .serviceUnavailable:
             return "Restaurant recommendations are temporarily unavailable. Please try again in a moment."
+        case .dailyLimitReached:
+            // Says what happened and when it changes. No apology, no vague "later",
+            // and no hint that retrying might work — it won't.
+            return "HungryNow serves a limited number of recommendations each day, and today’s are gone. Come back tomorrow and you’ll get a fresh pick."
+        }
+    }
+
+    /// Whether retrying can plausibly succeed. `false` hides the retry action entirely
+    /// rather than showing a disabled one — see `NetworkErrorView.footer`.
+    var isRetryable: Bool {
+        switch self {
+        case .offline, .serviceUnavailable:
+            return true
+        case .dailyLimitReached:
+            return false
         }
     }
 }
@@ -125,11 +152,16 @@ struct NetworkErrorView: View {
 
     private var footer: some View {
         VStack(spacing: 8) {
-            PrimaryButton(
-                title: "Try again",
-                trailingGlyph: .reload,
-                action: onRetry
-            )
+            // Retry is omitted, not disabled, when it cannot work: a greyed-out button
+            // still reads as "this might come back in a second", which is the wrong
+            // expectation for a cap that resets at midnight.
+            if variant.isRetryable {
+                PrimaryButton(
+                    title: "Try again",
+                    trailingGlyph: .reload,
+                    action: onRetry
+                )
+            }
 
             // Text button: ChevronLeftGlyph + "Back to Home"
             Button(action: onHome) {
