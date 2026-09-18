@@ -171,3 +171,15 @@ Sadri asked whether Gemini token usage could be limited to avoid pay-as-you-go. 
 Removed `GEMINI_MAX_CANDIDATES`, added in the same pass and never wired to anything.
 
 **Still open, and worth deciding separately:** Gemini is called on every request, *outside* the location-cache branch, so a cache hit spends 0 Places quota but 1 Gemini call. `DAILY_REQUEST_LIMIT` guards only the Places side — there is no cap on Gemini calls. Acceptable while the free-tier RPD is generous, but it is the uncapped surface.
+
+## 2026-09-18 — Every glyph was invisible on iOS 16
+
+First real finding from the device pass, and it would have shipped. On iPhone SE / iOS 16.4 **all 20 glyphs rendered blank** — blank white circles where the back button and "Try another" should be, no cutlery on "I'm hungry", no pin on the location chip. Text and the PNG illustrations were unaffected. Sadri spotted it immediately from the screenshots.
+
+**Cause: `stroke="currentColor"` in every glyph SVG.** `currentColor` resolves against an inherited CSS colour, which exists in the HTML mockups the glyphs were authored in, but a standalone SVG in an asset catalog has no cascade to inherit from. iOS 17+ tolerates it; iOS 16's SVG support leaves it unresolved and draws nothing.
+
+Fixed by baking `#000000` into all 20 files. The literal never shows: the imagesets carry `template-rendering-intent`, so SwiftUI re-tints from `.foregroundColor` at draw time. The renderer just needs a real colour to resolve rather than a context-dependent keyword. Verified on SE/16.4 — every glyph now draws.
+
+**Why it was invisible until now.** Development ran on iPhone 17 Pro against a current iOS, where `currentColor` happens to work. The deployment target is 16.0, so the whole supported range below the dev device was untested. A single run on the oldest supported OS found it in minutes.
+
+**The generalisable rule, now in `AppGlyphs.swift` and the repo instructions:** SVG authored for the mockups cannot be moved into the asset catalog unchanged. `currentColor` is the specific trap, and the class is CSS-dependent constructs that have no meaning in a standalone file.

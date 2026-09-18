@@ -20,6 +20,12 @@
 //  - Colour comes from `.foregroundColor` / tint, not a `.stroke(_:)` argument.
 //  - A call site can no longer pick its own stroke weight. That is the point.
 //  - Editing a glyph means editing its `.svg`, not Swift path code.
+//  - **Never `currentColor` in these files.** It resolves against an inherited CSS
+//    colour, which the mockups provide and an asset catalog does not. iOS 17+
+//    tolerates it; iOS 16 leaves it unresolved and the glyph renders BLANK — all
+//    20 did, and it was invisible on a modern dev device (2026-09-18). Bake a
+//    literal colour; `template-rendering-intent` re-tints it anyway, so the baked
+//    value never reaches the screen.
 //
 
 import SwiftUI

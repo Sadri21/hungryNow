@@ -71,6 +71,8 @@ hungrynow/
 
 **The one rule that matters:** ViewModels depend only on protocols (`RecommendationServiceProtocol`, `LocationServiceProtocol`, `NetworkMonitorProtocol`), never on concrete implementations or third-party libraries directly. Never call a service directly from a View or ViewModel. This dependency inversion is what lets networking/data sources/AI providers get swapped later without touching UI or business logic — it's the whole architectural point of this project, not incidental style.
 
+**Testing matters below your dev device.** Deployment target is iOS 16.0, and the gap between it and a current simulator hides real bugs: on 2026-09-18 every glyph in the app rendered blank on iOS 16.4 because the SVGs used `currentColor`, which iOS 17+ resolves and 16 does not. Run the oldest supported OS (iPhone SE, iOS 16.4) before believing a UI change is done.
+
 **Gotcha when adding a `NetworkErrorVariant` case:** `RecommendationView.Screen.hashKey` switches exhaustively over it, in a file that never mentions the new state. Adding a case breaks the build there. Grep for other switches on the enum rather than trusting a per-file check.
 
 **Tests are thin — do not read a green suite as safety.** Two unit tests exist, both on `FactFormatter` number formatting. Nothing covers the decode path, the service layer, or `_is_place_open`, which is exactly where the real bugs of 2026-09-17 were. Run the suite, but verify behaviour against the live function too.
