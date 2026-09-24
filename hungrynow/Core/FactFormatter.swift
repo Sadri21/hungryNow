@@ -77,6 +77,21 @@ enum FactFormatter {
         decimalFormatter(fractionDigits: 1).string(from: value as NSNumber) ?? "—"
     }
 
+    /// The rating spoken aloud: "4.3 out of 5".
+    ///
+    /// VoiceOver reads a comma-decimal locale's "4,3" as a list — "four, three" — so a
+    /// 4.3-star place sounds like two numbers. Spelling the separator as a word fixes
+    /// that, and "out of 5" restores the scale the star glyph carried visually before
+    /// it was hidden from the accessibility tree.
+    ///
+    /// Takes the already-formatted string rather than the Double so there is one
+    /// rounding rule, not two: whatever the column shows is what gets spoken.
+    static func spokenRating(_ formattedValue: String) -> String {
+        let separator = Locale.current.decimalSeparator ?? "."
+        let spoken = formattedValue.replacingOccurrences(of: separator, with: " point ")
+        return "Rated \(spoken) out of 5"
+    }
+
     /// "4.7" — always one decimal place.
     ///
     /// One place, padded: Places returns 4.0 as often as 4.7, and "4" beside "4.7" in the

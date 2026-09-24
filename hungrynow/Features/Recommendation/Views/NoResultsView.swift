@@ -113,6 +113,7 @@ struct NoResultsView: View {
                     .scaledToFit()
                     .frame(width: 24, height: 24)
                     .foregroundColor(Color.text2)
+                    .accessibilityHidden(true)
 
                 Text("1.5 km")
                     .font(.system(size: 28, weight: .bold))

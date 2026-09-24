@@ -26,6 +26,7 @@ struct ResultSheet: View {
             // "PICKED FOR YOU" tag
             HStack(spacing: 8) {
                 AppGlyph.cutlery.image(size: 16, color: Color.heroText)
+                    .accessibilityHidden(true)
                 Text("PICKED FOR YOU")
                     .font(AppFont.microLabel)
                     .tracking(Metrics.microTracking)
@@ -75,6 +76,7 @@ struct ResultSheet: View {
         HStack(alignment: .center) {
             HStack(spacing: 4) {
                 AppGlyph.locationPin.image(size: 14, color: Color.text2)
+                    .accessibilityHidden(true)
                 Text(locationName ?? "Near you")
                     .font(AppFont.chip)
                     .foregroundColor(Color.text2)

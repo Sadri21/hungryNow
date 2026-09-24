@@ -178,7 +178,14 @@ final class RecommendationViewModel: ObservableObject {
             facts.append(Fact(label: "away", value: distanceText))
         }
         if let ratingValue {
-            facts.append(Fact(label: ratingLabel, value: ratingValue, showsStar: true))
+            facts.append(
+                Fact(
+                    label: ratingLabel,
+                    value: ratingValue,
+                    showsStar: true,
+                    spokenValue: FactFormatter.spokenRating(ratingValue)
+                )
+            )
         }
         if let priceText {
             facts.append(Fact(label: "per person", value: priceText))

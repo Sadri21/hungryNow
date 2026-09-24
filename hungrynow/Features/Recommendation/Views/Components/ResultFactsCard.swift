@@ -23,6 +23,7 @@ struct ResultFactsCard: View {
                     if fact.showsStar {
                         HStack(spacing: 5) {
                             AppGlyph.starFill.image(size: 16, color: Color.heroText)
+                                .accessibilityHidden(true)
                             Text(fact.value)
                                 .font(.system(size: 22, weight: .bold, design: .rounded))
                                 .foregroundColor(Color.text)
@@ -43,6 +44,8 @@ struct ResultFactsCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, index == 0 ? 0 : 14)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(fact.spokenValue ?? fact.value), \(fact.label)")
             }
         }
         .padding(.horizontal, 16)

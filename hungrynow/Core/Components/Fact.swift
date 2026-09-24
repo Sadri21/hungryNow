@@ -29,5 +29,13 @@ struct Fact: Identifiable {
     /// column, position stops identifying the fact: a starred price is one omission away.
     var showsStar: Bool = false
 
+    /// What VoiceOver reads in place of `value`, when the written form misleads aloud.
+    ///
+    /// A rating renders as "4,3" in a comma-decimal locale, which VoiceOver reads as a
+    /// list — "four, three" — so a 4.3-star place sounds like two separate numbers.
+    /// Spelling it out also restores the scale the star glyph carried visually.
+    /// Nil means the written value already reads correctly.
+    var spokenValue: String? = nil
+
     var id: String { label }
 }

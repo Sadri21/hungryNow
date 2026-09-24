@@ -84,7 +84,7 @@ struct HomeView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: clockSide, maxHeight: clockSide)
-                    .accessibilityLabel("Plate and table setting arranged as a clock")
+                    .accessibilityHidden(true)
                 Spacer()
             }
             .padding(.horizontal, Metrics.space5)
@@ -109,6 +109,7 @@ struct HomeView: View {
                     HStack {
                         HStack(spacing: 6) {
                             AppGlyph.walkingPerson.image(size: 16, color: Color.text2)
+                                .accessibilityHidden(true)
 
                             Text("Within walking distance")
                                 .font(.system(size: 13, weight: .regular))

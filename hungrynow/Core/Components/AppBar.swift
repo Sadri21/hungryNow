@@ -27,6 +27,8 @@ struct WordmarkView: View {
         }
         .font(.system(size: size, weight: .bold))
         .tracking(-1.1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("hungrynow")
     }
 }
 
@@ -69,6 +71,7 @@ struct LocationChip: View {
                 .scaledToFit()
                 .frame(width: pinSize, height: pinSize)
                 .foregroundColor(Color.text2)
+                .accessibilityHidden(true)
 
             Text(name)
                 .font(.system(size: 13, weight: .regular))

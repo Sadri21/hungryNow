@@ -60,6 +60,7 @@ struct WelcomeView: View {
                                 .frame(width: 20, height: 20)
                                 .foregroundColor(Color.text2)
                                 .padding(.top, 2)
+                                .accessibilityHidden(true)
 
                             Text("Your location helps find restaurants within walking distance.")
                                 .font(.system(size: 14, weight: .regular))
@@ -109,6 +110,8 @@ struct WelcomeView: View {
                         .padding(.bottom, 2)
                 }
                 .font(.system(size: 22, weight: .bold))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("hungrynow")
 
                 Spacer()
 
@@ -128,6 +131,7 @@ struct WelcomeView: View {
                 .frame(height: illustrationHeight)
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, Metrics.space2)
+                .accessibilityHidden(true)
         }
     }
 

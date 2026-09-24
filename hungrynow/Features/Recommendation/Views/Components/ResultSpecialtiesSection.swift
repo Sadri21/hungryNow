@@ -54,16 +54,22 @@ struct ResultSpecialtiesSection: View {
                                     if let rating = pick.rating {
                                         HStack(spacing: 3) {
                                             AppGlyph.star.image(size: 13, color: Color.specText)
+                                                .accessibilityHidden(true)
                                             Text(FactFormatter.ratingValue(rating))
                                                 .font(.system(size: 13, weight: .bold, design: .rounded))
                                                 .foregroundColor(Color.specText)
                                         }
+                                        .accessibilityElement(children: .ignore)
+                                        .accessibilityLabel(
+                                            FactFormatter.spokenRating(FactFormatter.ratingValue(rating))
+                                        )
                                     }
 
                                     if let count = pick.ratingCount, count > 0 {
                                         Text("·")
                                             .font(.system(size: 13, design: .rounded))
                                             .foregroundColor(Color.hairline)
+                                            .accessibilityHidden(true)
 
                                         Text("\(FactFormatter.compactCount(count)) reviews")
                                             .font(.system(size: 13, design: .rounded))
@@ -77,6 +83,7 @@ struct ResultSpecialtiesSection: View {
                                         Text("·")
                                             .font(.system(size: 13, design: .rounded))
                                             .foregroundColor(Color.hairline)
+                                            .accessibilityHidden(true)
 
                                         Text(priceText)
                                             .font(.system(size: 13, design: .rounded))
